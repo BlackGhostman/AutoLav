@@ -312,6 +312,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FORM SUBMISSION LOGIC ---
     dom.citaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // --- VALIDACIÓN DEL LADO DEL CLIENTE ---
+        const requiredFields = {
+            'Placa': dom.placa.value,
+            'Nombre del Cliente': dom.nombre.value,
+            'Fecha de la Cita': dom.citaFecha.value,
+            'Hora de la Cita': dom.citaHora.value
+        };
+
+        const missingFields = Object.entries(requiredFields)
+            .filter(([_, value]) => !value.trim())
+            .map(([key, _]) => key);
+
+        if (missingFields.length > 0) {
+            alert(`Por favor, complete los siguientes campos obligatorios:\n- ${missingFields.join('\n- ')}`);
+            return;
+        }
         
         const selectedWashType = dom.washTypeOptions.querySelector('input[name="wash-type"]:checked');
         const selectedExtraServices = Array.from(dom.extraServicesOptions.querySelectorAll('input[name="extra-service"]:checked'))

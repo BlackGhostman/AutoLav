@@ -10,8 +10,8 @@ $data = json_decode($json_data, true);
 
 if ($data) {
     // Validar datos obligatorios
-    if (empty($data['placa']) || empty($data['cliente_nombre']) || empty($data['fecha_cita']) || empty($data['hora_cita']) || empty($data['tipo_lavado'])) {
-        $response['message'] = 'Faltan datos obligatorios: Placa, Nombre, Fecha, Hora o Tipo de Lavado.';
+    if (empty($data['placa']) || empty($data['cliente_nombre']) || empty($data['fecha_cita']) || empty($data['hora_cita'])) {
+        $response['message'] = 'Faltan datos obligatorios: Placa, Nombre, Fecha u Hora.';
     } else {
         // Asignar variables desde los datos recibidos
         $placa = $data['placa'];
