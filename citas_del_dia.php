@@ -57,14 +57,19 @@ include 'menu.php';
                     card.className = 'bg-gray-800 p-4 rounded-lg shadow-lg flex justify-between items-center';
                     const fechaHora = new Date(`${cita.fecha_cita}T${cita.hora_cita}`);
 
+                    const notasHTML = cita.notas
+                        ? `<p class="text-sm text-yellow-300 mt-2"><i class="fas fa-sticky-note mr-2"></i><strong>Notas:</strong> ${cita.notas}</p>`
+                        : '';
+
                     card.innerHTML = `
-                        <div>
+                        <div class="flex-grow pr-4">
                             <p class="font-bold text-lg text-white">${cita.placa}</p>
                             <p class="text-sm text-gray-300">${cita.nombre_cliente || 'Cliente no especificado'}</p>
                             <p class="text-sm text-gray-400">Hora: ${fechaHora.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                             <p class="text-sm text-gray-400">Servicio: ${cita.servicio_base || 'No especificado'}</p>
+                            ${notasHTML}
                         </div>
-                        <button data-cita='${JSON.stringify(cita)}' class="iniciar-servicio-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">
+                        <button data-cita='${JSON.stringify(cita)}' class="iniciar-servicio-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition self-center">
                             Iniciar Servicio <i class="fas fa-play ml-2"></i>
                         </button>
                     `;

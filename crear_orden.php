@@ -55,7 +55,7 @@ try {
 
     // --- PASO 3.5: Actualizar estado de la cita (si aplica) ---
     if (!empty($data['cita_id'])) {
-        $stmt_update_cita = $conexion->prepare("UPDATE citas SET estado = 'Iniciado' WHERE id = ?");
+        $stmt_update_cita = $conexion->prepare("UPDATE citas SET estado = 'Iniciado' WHERE id_cita = ?");
         $stmt_update_cita->execute([$data['cita_id']]);
     }
 
