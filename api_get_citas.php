@@ -11,6 +11,7 @@ $estado_filtro = isset($_GET['estado']) ? $_GET['estado'] : null;
 $sql = "SELECT 
             id_cita, 
             placa, 
+            tipo_vehiculo,
             cedula_cliente, 
             nombre_cliente, 
             telefono_cliente, 

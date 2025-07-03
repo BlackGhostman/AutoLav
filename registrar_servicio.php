@@ -395,8 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    dom.vehicleType.addEventListener('change', async (e) => {
-        const selectedType = e.target.value;
+    async function handleVehicleTypeChange(selectedType) {
         if (selectedType) {
             await fetchWashTypes(selectedType);
             showSection(dom.extraServicesContainer);
@@ -407,6 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
         hideSection(dom.finalizeSection);
         updateTotal();
         updateParentSectionHeight(dom.vehicleServicesSection);
+    }
+
+    dom.vehicleType.addEventListener('change', (e) => {
+        handleVehicleTypeChange(e.target.value);
     });
 
     dom.vehicleServicesSection.addEventListener('change', () => {
@@ -424,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     async function initializePage() {
-        await fetchInitialData(); 
+        await fetchInitialData();
 
         const citaDataString = sessionStorage.getItem('citaParaServicio');
         if (!citaDataString) return;
@@ -433,35 +436,57 @@ document.addEventListener('DOMContentLoaded', () => {
             const citaData = JSON.parse(citaDataString);
             currentOrder.cita_id = citaData.id_cita;
 
+            // Rellenar campos y deshabilitar la placa para evitar conflictos
             dom.placa.value = citaData.placa || '';
-            dom.placa.dispatchEvent(new Event('input'));
-
+            dom.placa.disabled = true;
             dom.cedula.value = citaData.cedula_cliente || '';
             dom.nombre.value = citaData.nombre_cliente || '';
             dom.celular.value = citaData.telefono_cliente || '';
             dom.email.value = citaData.email_cliente || '';
 
-            if (citaData.tipo_vehiculo) {
-                dom.vehicleType.value = citaData.tipo_vehiculo;
-                await fetchWashTypes(citaData.tipo_vehiculo); 
+            showSection(dom.clientSection);
+            showSection(dom.vehicleServicesSection);
+
+            // Buscar activamente los datos del vehículo (incluido el tipo) por placa
+            let vehicleType = citaData.tipo_vehiculo; // Usar el de la cita como fallback
+            if (citaData.placa) {
+                try {
+                    const response = await fetch(`get_vehicle_data.php?placa=${citaData.placa}`);
+                    const result = await response.json();
+                    if (result.success && result.data && result.data.tipo_vehiculo) {
+                        vehicleType = result.data.tipo_vehiculo;
+                    }
+                } catch (error) {
+                    console.error('Error al autocompletar datos del vehículo desde la cita.', error);
+                }
             }
-            
+
+            // Con el tipo de vehículo, actualizar la UI y cargar los lavados
+            if (vehicleType) {
+                dom.vehicleType.value = vehicleType;
+                await handleVehicleTypeChange(vehicleType);
+            }
+
+            // Ahora que los lavados están cargados, seleccionar el servicio base
             if (citaData.servicio_base) {
                 const washRadio = dom.washTypeOptions.querySelector(`input[data-name="${citaData.servicio_base}"]`);
                 if (washRadio) washRadio.checked = true;
             }
 
+            // Seleccionar los servicios extras
             if (citaData.servicios_extras && Array.isArray(citaData.servicios_extras)) {
                 citaData.servicios_extras.forEach(extraName => {
                     const extraCheckbox = dom.extraServicesOptions.querySelector(`input[data-name="${extraName}"]`);
                     if (extraCheckbox) extraCheckbox.checked = true;
                 });
             }
-            
+
+            // Disparar el evento 'change' para actualizar el total final
             dom.vehicleServicesSection.dispatchEvent(new Event('change'));
 
         } catch (e) {
             console.error("Error al procesar datos de la cita:", e);
+            dom.placa.disabled = false; // Re-habilitar en caso de error
         } finally {
             sessionStorage.removeItem('citaParaServicio');
         }
