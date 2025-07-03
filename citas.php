@@ -120,7 +120,6 @@ include 'menu.php';
     </div>
 </main>
 
-<script src="js/servicios.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM REFERENCES ---
@@ -144,10 +143,32 @@ document.addEventListener('DOMContentLoaded', () => {
         notas: document.getElementById('notas'),
     };
 
-    // --- SERVICE POPULATION LOGIC ---
-    function populateVehicleTypes() {
+    // --- STATE ---
+    let placaTimeout;
+    let cedulaTimeout;
+    let extraServices = [];
+
+    // --- DATA FETCHING & POPULATION ---
+    async function fetchInitialData() {
+        try {
+            const response = await fetch('get_servicios.php');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            
+            extraServices = data.extraServices || [];
+            const vehicleTypes = data.vehicleTypes || [];
+
+            populateVehicleTypes(vehicleTypes);
+            populateExtraServices();
+        } catch (error) {
+            console.error('Error fetching initial data:', error);
+            alert('No se pudieron cargar los datos iniciales. Verifique la conexión.');
+        }
+    }
+
+    function populateVehicleTypes(vehicleTypes) {
         dom.vehicleType.innerHTML = '<option value="" disabled selected>-- Elija una opción --</option>';
-        Object.keys(serviciosPorTipo).forEach(type => {
+        vehicleTypes.forEach(type => {
             const option = document.createElement('option');
             option.value = type;
             option.textContent = type;
@@ -155,126 +176,145 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function populateWashTypes(vehicle) {
-        const services = serviciosPorTipo[vehicle]?.baseServices || [];
-        dom.washTypeOptions.innerHTML = '';
-        if (services.length > 0) {
-            services.forEach(service => {
-                const label = document.createElement('label');
-                label.className = 'flex items-center space-x-3 cursor-pointer';
-                const input = document.createElement('input');
-                input.type = 'radio';
-                input.name = 'wash-type';
-                input.value = service.name;
-                input.dataset.price = service.price;
-                input.className = 'form-radio h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500';
-                label.appendChild(input);
-                const span = document.createElement('span');
-                span.textContent = `${service.name} (₡${service.price.toLocaleString('es-CR')})`;
-                label.appendChild(span);
-                dom.washTypeOptions.appendChild(label);
-            });
+    async function fetchWashTypes(vehicleType) {
+        dom.washTypeOptions.innerHTML = '<div class="flex justify-center items-center p-4"><div class="loader"></div></div>';
+        try {
+            const response = await fetch(`get_servicios.php?vehicle_type=${encodeURIComponent(vehicleType)}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            populateWashTypes(data.baseServices || []);
+        } catch (error) {
+            console.error(`Error fetching wash types for ${vehicleType}:`, error);
+            dom.washTypeOptions.innerHTML = '<p class="text-red-500 text-center">Error al cargar los tipos de lavado.</p>';
+        }
+    }
+
+    function populateWashTypes(services) {
+        dom.washTypeOptions.innerHTML = "";
+        if (services.length === 0) {
+            dom.washTypeOptions.innerHTML = '<p class="text-gray-500 text-center">No hay lavados base definidos.</p>';
         } else {
-            dom.washTypeOptions.innerHTML = '<p class="text-gray-500">No hay servicios de lavado para este tipo de vehículo.</p>';
+            services.forEach(service => {
+                const id = `wash-${service.id}`;
+                const div = document.createElement('div');
+                div.className = 'flex items-center';
+                div.innerHTML = `<input id="${id}" name="wash-type" type="radio" value="${service.name}" class="h-4 w-4 text-blue-600"><label for="${id}" class="ml-3 block text-sm text-gray-800">${service.name} (₡${service.price.toLocaleString('es-CR')})</label>`;
+                dom.washTypeOptions.appendChild(div);
+            });
         }
     }
 
     function populateExtraServices() {
-        dom.extraServicesOptions.innerHTML = '';
-        serviciosAdicionales.forEach(service => {
-            const label = document.createElement('label');
-            label.className = 'flex items-center space-x-3 cursor-pointer';
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.name = 'extra-services';
-            input.value = service.name; // Use name for saving
-            input.dataset.price = service.price;
-            input.className = 'form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500';
-            label.appendChild(input);
-            const span = document.createElement('span');
-            span.textContent = `${service.name} (₡${service.price.toLocaleString('es-CR')})`;
-            label.appendChild(span);
-            dom.extraServicesOptions.appendChild(label);
+        dom.extraServicesOptions.innerHTML = "";
+        extraServices.forEach(service => {
+            const id = `extra-${service.id}`;
+            const div = document.createElement('div');
+            div.className = 'flex items-center';
+            div.innerHTML = `<input id="${id}" name="extra-service" type="checkbox" value="${service.name}" class="h-4 w-4 text-blue-600 rounded"><label for="${id}" class="ml-3 block text-sm text-gray-800">${service.name} (₡${service.price.toLocaleString('es-CR')})</label>`;
+            dom.extraServicesOptions.appendChild(div);
         });
     }
 
-    // --- PLATE SEARCH LOGIC ---
-    let placaTimeout;
-    dom.placa.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        clearTimeout(placaTimeout);
-        if (e.target.value.length >= 3) {
-            dom.placaLoader.classList.remove('hidden');
-            placaTimeout = setTimeout(() => {
-                buscarVehiculoPorPlaca(e.target.value);
-            }, 500);
-        } else {
-            dom.placaLoader.classList.add('hidden');
-        }
-    });
-
+    // --- SEARCH LOGIC ---
     async function buscarVehiculoPorPlaca(placa) {
+        dom.placaLoader.classList.remove('hidden');
         try {
-            const response = await fetch(`buscar_vehiculo.php?placa=${placa}`);
+            const response = await fetch(`get_vehicle_data.php?placa=${placa}`);
             const result = await response.json();
 
-            if (result && result.success && result.data) {
-                const vehiculo = result.data;
-                if (vehiculo.tipo_vehiculo) {
-                    dom.vehicleType.value = vehiculo.tipo_vehiculo;
+            if (result.success && result.data) {
+                const data = result.data;
+                dom.cedula.value = data.cedula_cliente || '';
+                dom.nombre.value = data.nombre_cliente || '';
+                dom.telefono.value = data.celular_cliente || '';
+                dom.email.value = data.email_cliente || '';
+                
+                if (data.tipo_vehiculo && dom.vehicleType.querySelector(`option[value="${data.tipo_vehiculo}"]`)) {
+                    dom.vehicleType.value = data.tipo_vehiculo;
                     dom.vehicleType.dispatchEvent(new Event('change'));
                 }
-                if (vehiculo.cliente) {
-                    dom.cedula.value = vehiculo.cliente.cedula || '';
-                    dom.nombre.value = vehiculo.cliente.nombre || '';
-                    dom.telefono.value = vehiculo.cliente.celular || '';
-                    dom.email.value = vehiculo.cliente.email || '';
-                }
+            } else {
+                dom.nombre.value = '';
+                dom.telefono.value = '';
+                dom.email.value = '';
+                dom.cedula.value = '';
             }
         } catch (error) {
-            console.error('Error al buscar vehículo:', error);
+            console.error('Error al buscar datos del vehículo.', error);
         } finally {
             dom.citaDetailsSection.classList.remove('hidden');
             dom.placaLoader.classList.add('hidden');
         }
     }
 
-    // --- CLIENT SEARCH LOGIC ---
-    let cedulaTimeout;
-    dom.cedula.addEventListener('input', () => {
-        clearTimeout(cedulaTimeout);
-        if (dom.cedula.value.length >= 9) {
-            dom.cedulaLoader.classList.remove('hidden');
-            cedulaTimeout = setTimeout(() => {
-                buscarClientePorCedula(dom.cedula.value);
-            }, 500);
-        } else {
-            dom.cedulaLoader.classList.add('hidden');
-        }
-    });
-
     async function buscarClientePorCedula(cedula) {
+        dom.cedulaLoader.classList.remove('hidden');
         try {
-            const response = await fetch(`buscar_cliente.php?cedula=${cedula}`);
-            const result = await response.json();
-            if (result && result.success && result.data) {
-                dom.nombre.value = result.data.nombre || '';
-                dom.telefono.value = result.data.celular || '';
-                dom.email.value = result.data.email || '';
+            let response = await fetch(`get_vehicle_data.php?cedula=${cedula}`);
+            let result = await response.json();
+
+            if (result.success && result.data) {
+                const data = result.data;
+                dom.nombre.value = data.nombre_cliente || '';
+                dom.telefono.value = data.celular_cliente || '';
+                dom.email.value = data.email_cliente || '';
+            } else if (cedula.length === 9) {
+                response = await fetch(`buscar_cedula.php?cedula=${cedula}`);
+                result = await response.json();
+
+                if (result.success && result.nombreCompleto) {
+                    dom.nombre.value = result.nombreCompleto;
+                    dom.telefono.value = '';
+                    dom.email.value = '';
+                }
             }
         } catch (error) {
-            console.error('Error al buscar cliente:', error);
+            console.error('Error al buscar datos del cliente por cédula.', error);
         } finally {
             dom.cedulaLoader.classList.add('hidden');
         }
     }
+
+    // --- EVENT LISTENERS ---
+    dom.placa.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+        clearTimeout(placaTimeout);
+        if (e.target.value.length >= 3) {
+            placaTimeout = setTimeout(() => {
+                buscarVehiculoPorPlaca(e.target.value);
+            }, 300);
+        } else {
+            dom.citaDetailsSection.classList.add('hidden');
+        }
+    });
+
+    dom.cedula.addEventListener('input', (e) => {
+        clearTimeout(cedulaTimeout);
+        if (dom.nombre.value === '' && e.target.value.length >= 9) {
+            cedulaTimeout = setTimeout(() => {
+                buscarClientePorCedula(e.target.value);
+            }, 300);
+        }
+    });
+
+    dom.vehicleType.addEventListener('change', async (e) => {
+        const selectedVehicle = e.target.value;
+        if (selectedVehicle) {
+            dom.washTypeContainer.classList.remove('hidden');
+            dom.extraServicesContainer.classList.remove('hidden');
+            await fetchWashTypes(selectedVehicle);
+        } else {
+            dom.washTypeContainer.classList.add('hidden');
+            dom.extraServicesContainer.classList.add('hidden');
+        }
+    });
 
     // --- FORM SUBMISSION LOGIC ---
     dom.citaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const selectedWashType = dom.washTypeOptions.querySelector('input[name="wash-type"]:checked');
-        const selectedExtraServices = Array.from(dom.extraServicesOptions.querySelectorAll('input[name="extra-services"]:checked'))
+        const selectedExtraServices = Array.from(dom.extraServicesOptions.querySelectorAll('input[name="extra-service"]:checked'))
                                            .map(input => input.value);
 
         const citaData = {
@@ -313,21 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    dom.vehicleType.addEventListener('change', (e) => {
-        const selectedVehicle = e.target.value;
-        if (selectedVehicle) {
-            populateWashTypes(selectedVehicle);
-            dom.washTypeContainer.classList.remove('hidden');
-            dom.extraServicesContainer.classList.remove('hidden');
-        } else {
-            dom.washTypeContainer.classList.add('hidden');
-            dom.extraServicesContainer.classList.add('hidden');
-        }
-    });
-
     // --- INITIALIZATION ---
-    populateVehicleTypes();
-    populateExtraServices();
+    fetchInitialData();
 });
 </script>
 </body>
