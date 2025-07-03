@@ -186,6 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.totalAmount.textContent = new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC", minimumFractionDigits: 0 }).format(total);
     }
 
+
+
     // --- DATA FETCHING AND POPULATION ---
     async function fetchInitialData() {
         dom.placa.disabled = true;
@@ -399,11 +401,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedType) {
             await fetchWashTypes(selectedType);
             showSection(dom.extraServicesContainer);
+            showSection(dom.finalizeSection); // Mostrar sección final junto con los servicios
+            setCurrentTime();
         } else {
             hideSection(dom.washTypeContainer);
             hideSection(dom.extraServicesContainer);
+            hideSection(dom.finalizeSection);
         }
-        hideSection(dom.finalizeSection);
         updateTotal();
         updateParentSectionHeight(dom.vehicleServicesSection);
     }
@@ -412,16 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
         handleVehicleTypeChange(e.target.value);
     });
 
-    dom.vehicleServicesSection.addEventListener('change', () => {
-        updateTotal();
-        const selectedWash = dom.washTypeOptions.querySelector('input[name="wash-type"]:checked');
-        if (selectedWash) {
-            setCurrentTime();
-            showSection(dom.finalizeSection);
-        } else {
-            hideSection(dom.finalizeSection);
-        }
-    });
+    dom.vehicleServicesSection.addEventListener('change', updateTotal);
 
     dom.startWashButton.addEventListener('click', startWash);
 
@@ -436,53 +431,53 @@ document.addEventListener('DOMContentLoaded', () => {
             const citaData = JSON.parse(citaDataString);
             currentOrder.cita_id = citaData.id_cita;
 
-            // Rellenar campos y deshabilitar la placa para evitar conflictos
+            // 1. Rellenar campos desde la cita
             dom.placa.value = citaData.placa || '';
             dom.placa.disabled = true;
             dom.cedula.value = citaData.cedula_cliente || '';
             dom.nombre.value = citaData.nombre_cliente || '';
             dom.celular.value = citaData.telefono_cliente || '';
             dom.email.value = citaData.email_cliente || '';
-
             showSection(dom.clientSection);
             showSection(dom.vehicleServicesSection);
 
-            // Buscar activamente los datos del vehículo (incluido el tipo) por placa
-            let vehicleType = citaData.tipo_vehiculo; // Usar el de la cita como fallback
-            if (citaData.placa) {
-                try {
-                    const response = await fetch(`get_vehicle_data.php?placa=${citaData.placa}`);
-                    const result = await response.json();
-                    if (result.success && result.data && result.data.tipo_vehiculo) {
-                        vehicleType = result.data.tipo_vehiculo;
-                    }
-                } catch (error) {
-                    console.error('Error al autocompletar datos del vehículo desde la cita.', error);
-                }
-            }
-
-            // Con el tipo de vehículo, actualizar la UI y cargar los lavados
+            // 2. Cargar servicios para el tipo de vehículo de la cita
+            const vehicleType = citaData.tipo_vehiculo;
             if (vehicleType) {
                 dom.vehicleType.value = vehicleType;
                 await handleVehicleTypeChange(vehicleType);
             }
 
-            // Ahora que los lavados están cargados, seleccionar el servicio base
+            // 3. Seleccionar servicio base (de forma robusta)
             if (citaData.servicio_base) {
-                const washRadio = dom.washTypeOptions.querySelector(`input[data-name="${citaData.servicio_base}"]`);
-                if (washRadio) washRadio.checked = true;
+                const serviceNameToFind = citaData.servicio_base.trim().toLowerCase();
+                const washRadios = dom.washTypeOptions.querySelectorAll('input[name="wash-type"]');
+                for (const radio of washRadios) {
+                    if (radio.dataset.name.trim().toLowerCase() === serviceNameToFind) {
+                        radio.checked = true;
+                        break;
+                    }
+                }
             }
 
-            // Seleccionar los servicios extras
+            // 4. Seleccionar servicios extras (de forma robusta)
             if (citaData.servicios_extras && Array.isArray(citaData.servicios_extras)) {
-                citaData.servicios_extras.forEach(extraName => {
-                    const extraCheckbox = dom.extraServicesOptions.querySelector(`input[data-name="${extraName}"]`);
-                    if (extraCheckbox) extraCheckbox.checked = true;
+                const extraCheckboxes = dom.extraServicesOptions.querySelectorAll('input[type="checkbox"]');
+                citaData.servicios_extras.forEach(extraNameFromCita => {
+                    const serviceNameToFind = extraNameFromCita.trim().toLowerCase();
+                    for (const checkbox of extraCheckboxes) {
+                        if (checkbox.dataset.name.trim().toLowerCase() === serviceNameToFind) {
+                            checkbox.checked = true;
+                            break;
+                        }
+                    }
                 });
             }
 
-            // Disparar el evento 'change' para actualizar el total final
-            dom.vehicleServicesSection.dispatchEvent(new Event('change'));
+            // 5. Actualizar el total final tras una breve pausa para que el DOM refleje los cambios
+            setTimeout(() => {
+                updateTotal();
+            }, 50);
 
         } catch (e) {
             console.error("Error al procesar datos de la cita:", e);
