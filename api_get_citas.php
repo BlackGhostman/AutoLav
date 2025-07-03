@@ -15,7 +15,11 @@ $sql = "SELECT
             nombre_cliente, 
             telefono_cliente, 
             email_cliente, 
+            fecha_cita,
+            hora_cita,
+            servicio_base,
             servicios_extras,
+            notas,
             estado
         FROM citas WHERE 1=1";
 
