@@ -288,13 +288,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     dom.vehicleType.dispatchEvent(new Event('change'));
                 }
             } else {
-                dom.cedula.value = '';
+                // Si no se encuentra la placa, no limpiamos la cédula para permitir la búsqueda por este campo
                 dom.nombre.value = '';
                 dom.celular.value = '';
                 dom.email.value = '';
+                dom.cedula.value = ''; // Limpiamos la cédula si no se encuentra la placa
             }
         } catch (error) {
             console.error('Error al buscar datos del vehículo.', error);
+        }
+    }
+
+    async function buscarClientePorCedula(cedula) {
+        if (cedula.length < 9) return;
+
+        try {
+            // Primero, buscar en la base de datos local
+            let response = await fetch(`get_vehicle_data.php?cedula=${cedula}`);
+            let result = await response.json();
+
+            if (result.success && result.data) {
+                const data = result.data;
+                dom.nombre.value = data.nombre_cliente || '';
+                dom.celular.value = data.celular_cliente || '';
+                dom.email.value = data.email_cliente || '';
+            } else if (cedula.length === 9) {
+                // Si no se encuentra y la cédula tiene 9 dígitos, buscar en el servicio externo
+                response = await fetch(`buscar_cedula.php?cedula=${cedula}`);
+                result = await response.json();
+
+                if (result.success && result.nombreCompleto) {
+                    dom.nombre.value = result.nombreCompleto;
+                    // Dejar los otros campos vacíos para que el usuario los llene
+                    dom.celular.value = '';
+                    dom.email.value = '';
+                }
+            }
+        } catch (error) {
+            console.error('Error al buscar datos del cliente por cédula.', error);
         }
     }
 
@@ -353,6 +384,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             hideSection(dom.clientSection);
             hideSection(dom.vehicleServicesSection);
+        }
+    });
+
+    dom.cedula.addEventListener('input', (e) => {
+        const cedulaValue = e.target.value;
+        // Solo buscar por cédula si la búsqueda por placa no arrojó resultados (nombre está vacío)
+        if (dom.nombre.value === '') {
+            buscarClientePorCedula(cedulaValue);
         }
     });
 
