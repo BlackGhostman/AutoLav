@@ -105,6 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const option = document.createElement('option');
                     option.value = method.id_forma_pago;
                     option.textContent = method.nombre;
+                    if (method.nombre.toLowerCase() === 'efectivo') {
+                        option.selected = true;
+                    }
                     paymentMethodSelect.appendChild(option);
                 });
             } else {
