@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 header('Content-Type: application/json');
 require_once 'conexion.php'; // Este archivo ya crea el objeto $conexion (PDO)
 

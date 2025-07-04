@@ -1,11 +1,5 @@
-<?php
-session_start();
-
-// Proteger la página. Si no hay sesión, redirigir a login.
-if (!isset($_SESSION['user_id'])) {
-    header('Location: index.php');
-    exit();
-}
+<?php 
+require_once 'proteger_pagina.php';
 
 // Incluir el menú
 include 'menu.php';

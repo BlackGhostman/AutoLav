@@ -58,11 +58,8 @@ if (isset($_SESSION['user_id'])) {
             
             <!-- Header -->
             <div class="text-center mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V5m0 14v-1M9 12l-2-2m6 0l2-2m-6 6l-2 2m6 0l2 2" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a6 6 0 100-12 6 6 0 000 12z" />
-                </svg>
-                <h1 class="text-3xl font-bold mt-4">LavaCar Deluxe</h1>
+                <img src="img/5125430911406550677.jpg" alt="Logo AUTOSPA BLUE LINE" class="w-32 h-auto mx-auto mb-4 rounded-lg">
+                <h2 class="text-3xl font-bold text-white">AUTOSPA BLUE LINE</h2>
                 <p class="text-slate-400 mt-1">Ingrese su PIN de acceso</p>
             </div>
 

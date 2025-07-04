@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 // Establece la cabecera para devolver JSON
 header('Content-Type: application/json; charset=utf-8');
 // Incluye la conexión a la base de datos

@@ -1,5 +1,6 @@
 <?php 
 $currentPage = 'reportes';
+require_once 'proteger_pagina.php'; // Guardián de seguridad
 include 'menu.php'; 
 ?>
 

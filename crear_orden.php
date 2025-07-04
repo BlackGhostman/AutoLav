@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 
 // -------------------------------------------------------------------
 // Archivo para Crear una Nueva Orden de Lavado (Convertido a PDO)

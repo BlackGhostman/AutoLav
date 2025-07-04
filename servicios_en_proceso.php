@@ -1,3 +1,4 @@
+<?php require_once 'proteger_pagina.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

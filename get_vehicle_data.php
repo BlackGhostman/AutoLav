@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 header('Content-Type: application/json');
 require 'conexion.php';
 

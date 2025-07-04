@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_pagina.php';
 require 'conexion.php';
 
 echo "<pre>";

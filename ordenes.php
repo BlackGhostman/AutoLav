@@ -1,4 +1,5 @@
 <?php
+require_once 'proteger_api.php';
 header('Content-Type: application/json');
 
 // --- Configuración de la Base de Datos ---

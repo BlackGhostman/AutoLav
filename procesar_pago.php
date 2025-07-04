@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 // Siempre devolver JSON para que el frontend no falle.
 header('Content-Type: application/json');
 

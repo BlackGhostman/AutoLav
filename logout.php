@@ -1,11 +1,13 @@
 <?php
-session_start();
+// Iniciar la sesión para poder acceder a ella.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Destruir todas las variables de sesión.
+// Limpiar el array de sesión.
 $_SESSION = array();
 
-// Si se desea destruir la sesión completamente, borre también la cookie de sesión.
-// Nota: ¡Esto destruirá la sesión, y no la información de la sesión!
+// Invalidar la cookie de sesión.
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -17,7 +19,7 @@ if (ini_get("session.use_cookies")) {
 // Finalmente, destruir la sesión.
 session_destroy();
 
-// Redirigir a la página de login
-header("Location: index.php");
-exit;
+// Redirigir al login con un mensaje de éxito (opcional).
+header('Location: index.php?logout=true');
+exit();
 ?>

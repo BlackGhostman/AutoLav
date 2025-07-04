@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 header('Content-Type: application/json');
 // Incluye la conexión, que nos da la variable $conexion (un objeto PDO).
 require_once 'conexion.php';

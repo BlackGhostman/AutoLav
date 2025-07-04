@@ -1,4 +1,5 @@
 <?php
+require_once 'proteger_pagina.php'; // Guardián de seguridad
 require_once 'conexion.php';
 
 // Verificar el estado actual de la caja

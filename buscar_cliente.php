@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 // --------------------------------------------------------
 // Archivo para Buscar un Cliente por Cédula
 // --------------------------------------------------------

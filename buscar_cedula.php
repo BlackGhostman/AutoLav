@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_api.php';
 // Establecer la cabecera para devolver contenido en formato JSON
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); // Permite el acceso desde cualquier origen, ajustar en producción.

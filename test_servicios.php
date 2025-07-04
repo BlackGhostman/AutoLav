@@ -1,4 +1,4 @@
-<?php
+<?php require_once 'proteger_pagina.php';
 // --------------------------------------------------------
 // Archivo de Prueba para Obtener Servicios del Catálogo
 // --------------------------------------------------------
