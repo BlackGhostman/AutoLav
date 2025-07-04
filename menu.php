@@ -43,7 +43,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!-- Vertical Sidebar -->
-<aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 fixed top-0 left-0 transition-transform duration-300 ease-in-out z-40 shadow-xl">
+<aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 fixed top-0 left-0 transform -translate-x-full sm:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-xl">
     <div class="text-center mb-10">
         <a href="dashboard.php">
             <!-- NOTA: Cambia 'img/logo.png' por la ruta real de tu logo -->

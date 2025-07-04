@@ -1,111 +1,75 @@
-<?php require_once 'proteger_pagina.php'; ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Servicio - AutoSpa Blue Line</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .form-input {
-            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db;
-            border-radius: 0.5rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            transition: ring 0.2s, border-color 0.2s;
-        }
-        .form-input:focus {
-            outline: none; border-color: #3b82f6; --tw-ring-color: #3b82f6;
-            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-        }
-        .loader {
-            border: 2px solid #f3f3f3; border-top: 2px solid #3498db;
-            border-radius: 50%; width: 16px; height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .form-section { transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out; overflow: hidden; }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-
 <?php 
-$currentPage = 'registrar_servicio';
-include 'menu.php'; 
+$page_title = 'Registrar Servicio - AutoSpa Blue Line';
+require_once 'header.php'; 
 ?>
 
-<main id="main-content" class="lg:ml-64 flex-grow">
-    <div class="w-full max-w-2xl mx-auto p-6 md:p-8">
-        <header class="mb-6 text-center">
-            <h1 class="text-3xl font-bold text-gray-900">Registrar Nuevo Servicio</h1>
-            <p class="text-gray-500">Siga los pasos para iniciar un nuevo lavado.</p>
-        </header>
+<div class="w-full max-w-2xl mx-auto p-6 md:p-8">
+    <header class="mb-6 text-center">
+        <h1 class="text-3xl font-bold text-gray-900">Registrar Nuevo Servicio</h1>
+        <p class="text-gray-500">Siga los pasos para iniciar un nuevo lavado.</p>
+    </header>
 
-        <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
-            <div>
-                <label for="placa" class="block text-lg font-semibold text-gray-700 mb-2">Paso 1: Ingrese la Placa</label>
-                <input type="text" id="placa" maxlength="7" class="form-input text-center text-xl tracking-widest" placeholder="ABC123">
-            </div>
-
-            <div id="client-section" class="form-section hidden opacity-0 max-h-0">
-                <label class="block text-lg font-semibold text-gray-700 mb-3">Paso 2: Información del Cliente (Opcional)</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg border">
-                    <div>
-                        <label for="cedula" class="block font-medium text-gray-600">Cédula</label>
-                        <input type="number" id="cedula" class="form-input">
-                    </div>
-                    <div class="relative">
-                        <label for="nombre" class="block font-medium text-gray-600">Nombre o Sociedad</label>
-                        <input type="text" id="nombre" class="form-input">
-                        <div id="nombre-loader" class="loader absolute right-2 top-8 hidden"></div>
-                    </div>
-                    <div>
-                        <label for="celular" class="block font-medium text-gray-600">Celular</label>
-                        <input type="tel" id="celular" maxlength="9" placeholder="1111-1111" class="form-input">
-                    </div>
-                    <div>
-                        <label for="email" class="block font-medium text-gray-600">Correo</label>
-                        <input type="email" id="email" class="form-input">
-                    </div>
-                </div>
-            </div>
-
-            <div id="vehicle-services-section" class="form-section hidden opacity-0 max-h-0 space-y-4">
-                <label class="block text-lg font-semibold text-gray-700 mb-2">Paso 3: Seleccione Vehículo y Servicios</label>
-                <div>
-                     <label for="vehicle-type" class="block text-sm font-medium text-gray-700">Tipo de Vehículo</label>
-                    <select id="vehicle-type" class="form-input mt-1"></select>
-                </div>
-                <div id="wash-type-container" class="form-section hidden opacity-0 max-h-0">
-                     <label class="block text-sm font-medium text-gray-700">Tipo de Lavado</label>
-                     <div id="wash-type-options" class="space-y-2 border p-4 rounded-lg mt-1 max-h-48 overflow-y-auto">
-                        <p class="text-gray-500">Seleccione un tipo de vehículo primero...</p>
-                    </div>
-                </div>
-                 <div id="extra-services-container" class="form-section hidden opacity-0 max-h-0">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Servicios adicionales</label>
-                    <div id="extra-services-options" class="space-y-2 max-h-48 overflow-y-auto pr-2 border rounded-lg p-4"></div>
-                </div>
-            </div>
-
-            <div id="finalize-section" class="form-section hidden opacity-0 max-h-0">
-                 <div class="my-6 text-center">
-                    <p class="text-lg font-semibold text-gray-700">Monto Total:</p>
-                    <p id="total-amount" class="text-3xl font-bold text-blue-600">₡0</p>
-                </div>
-                 <div class="mb-4 text-center">
-                    <label for="start-time" class="block text-lg font-semibold text-gray-700">Hora de Inicio</label>
-                    <input type="time" id="start-time" class="form-input w-48 mx-auto mt-2 text-center">
-                </div>
-                <button id="start-wash-button" class="w-full py-4 px-4 bg-green-600 text-white text-xl font-bold rounded-lg hover:bg-green-700 transition shadow-lg">INICIAR LAVADO</button>
-            </div>
-            <div id="status-message" class="hidden"></div>
+    <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
+        <div>
+            <label for="placa" class="block text-lg font-semibold text-gray-700 mb-2">Paso 1: Ingrese la Placa</label>
+            <input type="text" id="placa" maxlength="7" class="form-input text-center text-xl tracking-widest" placeholder="ABC123">
         </div>
+
+        <div id="client-section" class="form-section hidden opacity-0 max-h-0">
+            <label class="block text-lg font-semibold text-gray-700 mb-3">Paso 2: Información del Cliente (Opcional)</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg border">
+                <div>
+                    <label for="cedula" class="block font-medium text-gray-600">Cédula</label>
+                    <input type="number" id="cedula" class="form-input">
+                </div>
+                <div class="relative">
+                    <label for="nombre" class="block font-medium text-gray-600">Nombre o Sociedad</label>
+                    <input type="text" id="nombre" class="form-input">
+                    <div id="nombre-loader" class="loader absolute right-2 top-8 hidden"></div>
+                </div>
+                <div>
+                    <label for="celular" class="block font-medium text-gray-600">Celular</label>
+                    <input type="tel" id="celular" maxlength="9" placeholder="1111-1111" class="form-input">
+                </div>
+                <div>
+                    <label for="email" class="block font-medium text-gray-600">Correo</label>
+                    <input type="email" id="email" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <div id="vehicle-services-section" class="form-section hidden opacity-0 max-h-0 space-y-4">
+            <label class="block text-lg font-semibold text-gray-700 mb-2">Paso 3: Seleccione Vehículo y Servicios</label>
+            <div>
+                 <label for="vehicle-type" class="block text-sm font-medium text-gray-700">Tipo de Vehículo</label>
+                <select id="vehicle-type" class="form-input mt-1"></select>
+            </div>
+            <div id="wash-type-container" class="form-section hidden opacity-0 max-h-0">
+                 <label class="block text-sm font-medium text-gray-700">Tipo de Lavado</label>
+                 <div id="wash-type-options" class="space-y-2 border p-4 rounded-lg mt-1 max-h-48 overflow-y-auto">
+                    <p class="text-gray-500">Seleccione un tipo de vehículo primero...</p>
+                </div>
+            </div>
+             <div id="extra-services-container" class="form-section hidden opacity-0 max-h-0">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Servicios adicionales</label>
+                <div id="extra-services-options" class="space-y-2 max-h-48 overflow-y-auto pr-2 border rounded-lg p-4"></div>
+            </div>
+        </div>
+
+        <div id="finalize-section" class="form-section hidden opacity-0 max-h-0">
+             <div class="my-6 text-center">
+                <p class="text-lg font-semibold text-gray-700">Monto Total:</p>
+                <p id="total-amount" class="text-3xl font-bold text-blue-600">₡0</p>
+            </div>
+             <div class="mb-4 text-center">
+                <label for="start-time" class="block text-lg font-semibold text-gray-700">Hora de Inicio</label>
+                <input type="time" id="start-time" class="form-input w-48 mx-auto mt-2 text-center">
+            </div>
+            <button id="start-wash-button" class="w-full py-4 px-4 bg-green-600 text-white text-xl font-bold rounded-lg hover:bg-green-700 transition shadow-lg">INICIAR LAVADO</button>
+        </div>
+        <div id="status-message" class="hidden"></div>
     </div>
-</main>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -186,8 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         dom.totalAmount.textContent = new Intl.NumberFormat("es-CR", { style: "currency", currency: "CRC", minimumFractionDigits: 0 }).format(total);
     }
-
-
 
     // --- DATA FETCHING AND POPULATION ---
     async function fetchInitialData() {
