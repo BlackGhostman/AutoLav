@@ -45,16 +45,14 @@ try {
     // Consulta para los detalles
     $query_details = "
         SELECT 
-            c.id_cita,
-            c.fecha_cita,
-            c.estado,
-            cl.nombre AS nombre_cliente,
-            v.placa
-        FROM citas c
-        LEFT JOIN clientes cl ON c.id_cliente = cl.id_cliente
-        LEFT JOIN vehiculos v ON c.id_vehiculo = v.id_vehiculo
-        WHERE c.fecha_cita BETWEEN :startDate AND :endDate
-        ORDER BY c.fecha_cita DESC
+            id_cita,
+            fecha_cita,
+            estado,
+            nombre_cliente,
+            placa
+        FROM citas
+        WHERE fecha_cita BETWEEN :startDate AND :endDate
+        ORDER BY fecha_cita DESC
     ";
     $stmt_details = $conexion->prepare($query_details);
     $stmt_details->execute([':startDate' => $startDate, ':endDate' => $endDate]);

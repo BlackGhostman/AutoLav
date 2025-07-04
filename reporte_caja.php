@@ -11,54 +11,61 @@ if (empty($startDate) || empty($endDate)) {
     exit;
 }
 
-$endDate = $endDate . ' 23:59:59';
+// Añadir la hora para cubrir todo el día
+$startDateFormatted = $startDate . ' 00:00:00';
+$endDateFormatted = $endDate . ' 23:59:59';
 
 try {
-    // --- Asunción de la estructura de la tabla ---
-    // Se asume una tabla `caja_movimientos` con las columnas:
-    // `fecha`, `tipo_movimiento` ('APERTURA', 'INGRESO', 'EGRESO', 'CIERRE'), `monto`.
-
-    // Consulta para el resumen
+    // Consulta para el resumen de las sesiones de caja cerradas
     $query_summary = "
         SELECT 
-            SUM(CASE WHEN tipo_movimiento = 'INGRESO' THEN monto ELSE 0 END) AS total_ingresos,
-            SUM(CASE WHEN tipo_movimiento = 'EGRESO' THEN monto ELSE 0 END) AS total_egresos,
-            (SELECT monto FROM caja_movimientos WHERE tipo_movimiento = 'APERTURA' AND fecha >= :startDate ORDER BY fecha ASC LIMIT 1) AS saldo_inicial
-        FROM caja_movimientos
-        WHERE fecha BETWEEN :startDate AND :endDate
+            SUM(total_ventas) as total_ventas,
+            SUM(monto_inicial) as total_monto_inicial,
+            SUM(monto_final_real) as total_monto_final,
+            SUM(diferencia) as total_diferencia,
+            COUNT(*) as numero_sesiones
+        FROM caja_sesiones
+        WHERE fecha_cierre BETWEEN :startDate AND :endDate AND estado = 'CERRADA'
     ";
     $stmt_summary = $conexion->prepare($query_summary);
-    $stmt_summary->execute([':startDate' => $startDate, ':endDate' => $endDate]);
+    $stmt_summary->execute([':startDate' => $startDateFormatted, ':endDate' => $endDateFormatted]);
     $summary = $stmt_summary->fetch(PDO::FETCH_ASSOC);
 
-    // Calcular Saldo Final
-    $saldo_inicial = $summary['saldo_inicial'] ?? 0;
-    $total_ingresos = $summary['total_ingresos'] ?? 0;
-    $total_egresos = $summary['total_egresos'] ?? 0;
-    $summary['saldo_final'] = $saldo_inicial + $total_ingresos - $total_egresos;
-
-    // Consulta para los detalles
+    // Consulta para los detalles de cada sesión de caja
     $query_details = "
         SELECT 
-            fecha,
-            tipo_movimiento,
-            monto,
-            descripcion
-        FROM caja_movimientos
-        WHERE fecha BETWEEN :startDate AND :endDate
-        ORDER BY fecha DESC
+            id,
+            fecha_apertura,
+            fecha_cierre,
+            monto_inicial,
+            total_ventas,
+            monto_final_calculado,
+            monto_final_real,
+            diferencia,
+            notas_cierre
+        FROM caja_sesiones
+        WHERE fecha_cierre BETWEEN :startDate AND :endDate AND estado = 'CERRADA'
+        ORDER BY fecha_cierre DESC
     ";
     $stmt_details = $conexion->prepare($query_details);
-    $stmt_details->execute([':startDate' => $startDate, ':endDate' => $endDate]);
+    $stmt_details->execute([':startDate' => $startDateFormatted, ':endDate' => $endDateFormatted]);
     $details = $stmt_details->fetchAll(PDO::FETCH_ASSOC);
+
+    // Si no hay datos, devolver un resumen con ceros pero exitoso
+    if ($summary['numero_sesiones'] == 0) {
+        $summary = [
+            'total_ventas' => 0,
+            'total_monto_inicial' => 0,
+            'total_monto_final' => 0,
+            'total_diferencia' => 0,
+            'numero_sesiones' => 0
+        ];
+    }
 
     echo json_encode(['success' => true, 'data' => ['summary' => $summary, 'details' => $details]]);
 
 } catch (Exception $e) {
     http_response_code(500);
-    // Devolver un mensaje de error que incluye la suposición para facilitar la depuración
-    echo json_encode([
-        'success' => false, 
-        'message' => 'Error en la base de datos. Verifique que la tabla `caja_movimientos` y sus columnas (`fecha`, `tipo_movimiento`, `monto`) existan. Error original: ' . $e->getMessage()
-    ]);
+    $errorMessage = 'Error en la base de datos. Verifique que la tabla `caja_sesiones` y sus columnas existan. Error original: ' . $e->getMessage();
+    echo json_encode(['success' => false, 'message' => $errorMessage]);
 }

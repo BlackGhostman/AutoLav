@@ -81,41 +81,33 @@ include 'menu.php';
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elementos del DOM ---
-    const generateReportBtn = document.getElementById('generate-report-btn');
+    const generateReportBtn = document.getElementById('filter-btn'); // ID CORREGIDO
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
-    const tabsElement = document.getElementById('report-tabs');
-
-    // --- Inicialización de Pestañas (Tabs) ---
-    // Asegúrate de que el script de Flowbite esté cargado si usas su API de JS
-    // Si no, esta parte puede necesitar un inicializador de pestañas simple.
-    // Por ahora, asumimos que la clase 'hidden' y los clics en botones manejan las pestañas.
+    
+    // --- Lógica de Pestañas (Tabs) ---
     const tabs = document.querySelectorAll('[data-tabs-target]');
     const tabContents = document.querySelectorAll('[role="tabpanel"]');
 
+    // Estado inicial: Activar la primera pestaña por defecto
+    document.getElementById('facturacion-tab').classList.add('text-blue-600', 'border-blue-600', 'border-b-2');
+    document.getElementById('facturacion-tab').classList.remove('hover:text-gray-600', 'hover:border-gray-300');
+    document.getElementById('facturacion').classList.remove('hidden'); // ID CORREGIDO
+
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // Ocultar todos los contenidos
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
             tabContents.forEach(content => content.classList.add('hidden'));
-            
-            // Desactivar todas las pestañas
             tabs.forEach(t => {
-                t.classList.remove('text-blue-600', 'border-blue-600');
-                t.classList.add('text-gray-500', 'border-transparent');
+                t.classList.remove('text-blue-600', 'border-blue-600', 'border-b-2');
+                t.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
             });
-
-            // Mostrar el contenido de la pestaña seleccionada
             const target = document.querySelector(tab.dataset.tabsTarget);
-            if (target) {
-                target.classList.remove('hidden');
-            }
-
-            // Activar la pestaña seleccionada
-            tab.classList.add('text-blue-600', 'border-blue-600');
-            tab.classList.remove('text-gray-500', 'border-transparent');
+            if (target) target.classList.remove('hidden');
+            tab.classList.add('text-blue-600', 'border-blue-600', 'border-b-2');
+            tab.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
         });
     });
-
 
     // --- Evento del Botón "Generar Reporte" ---
     generateReportBtn.addEventListener('click', () => {
@@ -127,17 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const activeTab = document.querySelector('.tab-content:not(.hidden)');
+        const activeTab = document.querySelector('[role="tabpanel"]:not(.hidden)');
         if (!activeTab) return;
 
+        // IDs CORREGIDOS en el switch
         switch (activeTab.id) {
-            case 'facturacion-content':
+            case 'facturacion':
                 fetchFacturacionReport(startDate, endDate);
                 break;
-            case 'citas-content':
+            case 'citas':
                 fetchCitasReport(startDate, endDate);
                 break;
-            case 'caja-content':
+            case 'caja':
                 fetchCajaReport(startDate, endDate);
                 break;
         }
@@ -156,18 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function getMovementTypeColor(type) {
-        switch (type) {
-            case 'INGRESO': return 'bg-green-100 text-green-800';
-            case 'EGRESO': return 'bg-red-100 text-red-800';
-            case 'APERTURA': return 'bg-blue-100 text-blue-800';
-            case 'CIERRE': return 'bg-gray-100 text-gray-800';
-            default: return 'bg-yellow-100 text-yellow-800';
-        }
-    }
+
 
     // --- Funciones para Obtener Reportes ---
-
     async function fetchFacturacionReport(startDate, endDate) {
         const contentDiv = document.getElementById('facturacion-content');
         contentDiv.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando reporte...</div>';
@@ -176,10 +160,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
             const { summary, details } = result.data;
-            let html = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">...</div>`; // (Contenido del HTML del reporte)
-            contentDiv.innerHTML = '...'; // (Lógica para renderizar el HTML completo)
+            let html = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Facturado</p><p class="text-2xl font-bold">${formatCurrency(summary.total_facturado || 0)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">N° de Facturas</p><p class="text-2xl font-bold">${summary.numero_facturas || 0}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Promedio por Factura</p><p class="text-2xl font-bold">${formatCurrency(summary.promedio_factura || 0)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Descuentos</p><p class="text-2xl font-bold text-red-600">-${formatCurrency(summary.total_descuentos || 0)}</p></div>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr><th class="text-left py-3 px-4 font-semibold text-sm">N° Factura</th><th class="text-left py-3 px-4 font-semibold text-sm">Fecha</th><th class="text-left py-3 px-4 font-semibold text-sm">Cliente</th><th class="text-right py-3 px-4 font-semibold text-sm">Monto</th></tr></thead><tbody class="text-gray-700">`;
+            if (details.length > 0) {
+                details.forEach(factura => {
+                    html += `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="py-3 px-4">${factura.id_factura}</td><td class="py-3 px-4">${new Date(factura.fecha_factura).toLocaleString('es-CR')}</td><td class="py-3 px-4">${factura.nombre_cliente || 'N/A'}</td><td class="py-3 px-4 text-right font-medium">${formatCurrency(factura.total_pagado)}</td></tr>`;
+                });
+            } else {
+                html += '<tr><td colspan="4" class="text-center py-4">No se encontraron facturas en este período.</td></tr>';
+            }
+            html += `</tbody></table></div>`;
+            contentDiv.innerHTML = html;
         } catch (error) {
-            contentDiv.innerHTML = `<p class="text-center text-red-500 p-4">Error al cargar el reporte: ${error.message}</p>`;
+            contentDiv.innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"><strong class="font-bold">Error:</strong><span class="block sm:inline"> ${error.message}</span></div>`;
         }
     }
 
@@ -191,10 +190,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
             const { summary, details } = result.data;
-            let html = '...'; // (Lógica para renderizar el HTML completo)
+            let html = `
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total de Citas</p><p class="text-2xl font-bold text-blue-800">${summary.Total || 0}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Completadas</p><p class="text-2xl font-bold text-green-800">${summary.Completada || 0}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Pendientes</p><p class="text-2xl font-bold text-yellow-800">${summary.Pendiente || 0}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Confirmadas</p><p class="text-2xl font-bold text-purple-800">${summary.Confirmada || 0}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Canceladas</p><p class="text-2xl font-bold text-red-800">${summary.Cancelada || 0}</p></div>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr><th class="text-left py-3 px-4 font-semibold text-sm">ID Cita</th><th class="text-left py-3 px-4 font-semibold text-sm">Fecha</th><th class="text-left py-3 px-4 font-semibold text-sm">Cliente</th><th class="text-left py-3 px-4 font-semibold text-sm">Placa</th><th class="text-left py-3 px-4 font-semibold text-sm">Estado</th></tr></thead><tbody class="text-gray-700">`;
+            if (details.length > 0) {
+                details.forEach(cita => {
+                    html += `<tr class="border-b border-gray-200 hover:bg-gray-50"><td class="py-3 px-4">${cita.id_cita}</td><td class="py-3 px-4">${new Date(cita.fecha_cita).toLocaleString('es-CR')}</td><td class="py-3 px-4">${cita.nombre_cliente || 'N/A'}</td><td class="py-3 px-4">${cita.placa || 'N/A'}</td><td class="py-3 px-4"><span class="px-2 py-1 font-semibold leading-tight text-xs rounded-full ${getStatusColor(cita.estado)}">${cita.estado}</span></td></tr>`;
+                });
+            } else {
+                html += '<tr><td colspan="5" class="text-center py-4">No se encontraron citas en este período.</td></tr>';
+            }
+            html += `</tbody></table></div>`;
             contentDiv.innerHTML = html;
         } catch (error) {
-            contentDiv.innerHTML = `<p class="text-center text-red-500 p-4">Error al cargar el reporte: ${error.message}</p>`;
+            contentDiv.innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"><strong class="font-bold">Error:</strong><span class="block sm:inline"> ${error.message}</span></div>`;
         }
     }
 
@@ -206,10 +221,50 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
             const { summary, details } = result.data;
-            let html = '...'; // (Lógica para renderizar el HTML completo)
+
+            const getDiferenciaColor = (diferencia) => {
+                const val = parseFloat(diferencia);
+                if (val > 0) return 'text-green-600';
+                if (val < 0) return 'text-red-600';
+                return 'text-gray-700';
+            };
+
+            let html = `
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Ventas</p><p class="text-2xl font-bold">${formatCurrency(summary.total_ventas || 0)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Monto Final Real</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(summary.total_monto_final || 0)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Diferencias</p><p class="text-2xl font-bold ${getDiferenciaColor(summary.total_diferencia)}">${formatCurrency(summary.total_diferencia || 0)}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Sesiones Cerradas</p><p class="text-2xl font-bold">${summary.numero_sesiones || 0}</p></div>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr>
+                    <th class="text-left py-3 px-4 font-semibold text-sm">ID Sesión</th>
+                    <th class="text-left py-3 px-4 font-semibold text-sm">Fecha Cierre</th>
+                    <th class="text-right py-3 px-4 font-semibold text-sm">M. Inicial</th>
+                    <th class="text-right py-3 px-4 font-semibold text-sm">T. Ventas</th>
+                    <th class="text-right py-3 px-4 font-semibold text-sm">M. Calculado</th>
+                    <th class="text-right py-3 px-4 font-semibold text-sm">M. Real</th>
+                    <th class="text-right py-3 px-4 font-semibold text-sm">Diferencia</th>
+                </tr></thead><tbody class="text-gray-700">`;
+            
+            if (details.length > 0) {
+                details.forEach(sesion => {
+                    html += `<tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="py-3 px-4">${sesion.id}</td>
+                        <td class="py-3 px-4">${new Date(sesion.fecha_cierre).toLocaleString('es-CR')}</td>
+                        <td class="py-3 px-4 text-right">${formatCurrency(sesion.monto_inicial)}</td>
+                        <td class="py-3 px-4 text-right">${formatCurrency(sesion.total_ventas)}</td>
+                        <td class="py-3 px-4 text-right">${formatCurrency(sesion.monto_final_calculado)}</td>
+                        <td class="py-3 px-4 text-right font-bold">${formatCurrency(sesion.monto_final_real)}</td>
+                        <td class="py-3 px-4 text-right font-bold ${getDiferenciaColor(sesion.diferencia)}">${formatCurrency(sesion.diferencia)}</td>
+                    </tr>`;
+                });
+            } else {
+                html += '<tr><td colspan="7" class="text-center py-4">No se encontraron sesiones de caja cerradas en este período.</td></tr>';
+            }
+            html += `</tbody></table></div>`;
             contentDiv.innerHTML = html;
         } catch (error) {
-            contentDiv.innerHTML = `<p class="text-center text-red-500 p-4">Error al cargar el reporte: ${error.message}</p>`;
+            contentDiv.innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert"><strong class="font-bold">Error:</strong><span class="block sm:inline"> ${error.message}</span></div>`;
         }
     }
 });
