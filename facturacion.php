@@ -49,7 +49,7 @@ include 'menu.php';
         <div id="billing-summary-list" class="text-sm space-y-2 mb-4 max-h-40 overflow-y-auto"></div>
         <div class="space-y-4 border-t pt-4">
             <div><label for="discount-input" class="block text-sm font-medium text-gray-600">Descuento</label><input type="text" id="discount-input" placeholder="0" class="w-full mt-1 p-2 border rounded text-right"></div>
-            <div><label for="payment-method" class="block text-sm font-medium text-gray-600">Forma de Pago</label><select id="payment-method" class="w-full mt-1 p-2 border rounded"><option>Efectivo</option><option>Datafono Simplif.</option><option>Datafono Lavacar</option><option>Banco Nacional</option><option>Sinpe Móvil</option></select></div>
+            <div><label for="payment-method" class="block text-sm font-medium text-gray-600">Forma de Pago</label><select id="payment-method-select" class="w-full mt-1 p-2 border rounded"><option>Cargando...</option></select></div>
             <div id="cash-payment-section" class="hidden"><label for="cash-received" class="block text-sm font-medium text-gray-600">Paga con</label><input type="text" id="cash-received" placeholder="0" class="w-full mt-1 p-2 border rounded text-right"></div>
         </div>
         <div class="border-t pt-4 mt-4 space-y-2 font-medium">
@@ -93,7 +93,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const discountInput = document.getElementById('discount-input');
     const discountLine = document.getElementById('billing-discount-line');
     const totalEl = document.getElementById('billing-total');
-    const paymentMethodSelect = document.getElementById('payment-method');
+    const paymentMethodSelect = document.getElementById('payment-method-select');
+
+    async function loadPaymentMethods() {
+        try {
+            const response = await fetch('get_formas_pago.php');
+            const result = await response.json();
+            if (result.success) {
+                paymentMethodSelect.innerHTML = '';
+                result.data.forEach(method => {
+                    const option = document.createElement('option');
+                    option.value = method.id_forma_pago;
+                    option.textContent = method.nombre;
+                    paymentMethodSelect.appendChild(option);
+                });
+            } else {
+                paymentMethodSelect.innerHTML = '<option>Error al cargar</option>';
+            }
+        } catch (error) {
+            console.error('Error loading payment methods:', error);
+            paymentMethodSelect.innerHTML = '<option>Error de conexión</option>';
+        }
+    }
+
+    loadPaymentMethods();
     const cashSection = document.getElementById('cash-payment-section');
     const cashReceivedInput = document.getElementById('cash-received');
     const changeLine = document.getElementById('billing-change-line');
@@ -174,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateBillingModal() { const selectedIds = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => parseInt(cb.dataset.id)); const servicesToBill = servicesData.filter(s => selectedIds.includes(parseInt(s.id_servicio))); summaryList.innerHTML = ''; let subtotal = 0; servicesToBill.forEach(s => { summaryList.innerHTML += `<div class="flex justify-between"><span>Placa ${s.placa}</span><span>${formatCurrency(s.total_servicio)}</span></div>`; subtotal += parseFloat(s.total_servicio); }); const discount = parseFloat(discountInput.value.replace(/\D/g, '')) || 0; const total = subtotal - discount; const cashReceived = parseFloat(cashReceivedInput.value.replace(/\D/g, '')) || 0; subtotalEl.textContent = formatCurrency(subtotal); discountLine.innerHTML = discount > 0 ? `<span>Descuento:</span><span>-${formatCurrency(discount)}</span>` : ''; totalEl.textContent = formatCurrency(total); if (paymentMethodSelect.value === 'Efectivo') { cashSection.classList.remove('hidden'); if (cashReceived >= total) { changeLine.innerHTML = `<span>Vuelto:</span><span>${formatCurrency(cashReceived - total)}</span>`; } else { changeLine.innerHTML = ''; } } else { cashSection.classList.add('hidden'); changeLine.innerHTML = ''; } }
-    async function processPayment() { const selectedIds = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => parseInt(cb.dataset.id)); const subtotal = servicesData.filter(s => selectedIds.includes(parseInt(s.id_servicio))).reduce((acc, s) => acc + parseFloat(s.total_servicio), 0); const discount = parseFloat(discountInput.value.replace(/\D/g, '')) || 0; const total = subtotal - discount; const formData = new URLSearchParams(); selectedIds.forEach(id => { formData.append('id_servicio[]', id); }); formData.append('subtotal', subtotal); formData.append('descuento', discount); formData.append('total', total); formData.append('metodo_pago', paymentMethodSelect.value); const response = await fetch('procesar_pago.php', { method: 'POST', body: formData }); const result = await response.json(); if (result.success) { closeBillingModal(); showPrintableReceipt(result.id_factura); fetchServicesToBill(); } else { alert(result.message); } }
+    async function processPayment() { const selectedIds = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => parseInt(cb.dataset.id)); const subtotal = servicesData.filter(s => selectedIds.includes(parseInt(s.id_servicio))).reduce((acc, s) => acc + parseFloat(s.total_servicio), 0); const discount = parseFloat(discountInput.value.replace(/\D/g, '')) || 0; const total = subtotal - discount; const formData = new URLSearchParams(); selectedIds.forEach(id => { formData.append('id_servicio[]', id); }); formData.append('subtotal', subtotal); formData.append('descuento', discount); formData.append('total', total); formData.append('id_forma_pago', paymentMethodSelect.value); const response = await fetch('procesar_pago.php', { method: 'POST', body: formData }); const result = await response.json(); if (result.success) { closeBillingModal(); showPrintableReceipt(result.id_factura); fetchServicesToBill(); } else { alert(result.message); } }
     // Función para formatear moneda, si no existe globalmente
 if (typeof formatCurrency === 'undefined') {
     window.formatCurrency = (value) => {

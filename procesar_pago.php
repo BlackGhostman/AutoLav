@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['id_servicio']) || !is_array($_POST['id_servicio']) || empty($_POST['id_servicio'])) {
         $missing_fields[] = 'id_servicio';
     }
-    if (!isset($_POST['metodo_pago']) || empty(trim($_POST['metodo_pago']))) {
-        $missing_fields[] = 'metodo_pago';
+    if (!isset($_POST['id_forma_pago']) || !is_numeric($_POST['id_forma_pago'])) {
+        $missing_fields[] = 'id_forma_pago';
     }
     if (!isset($_POST['subtotal']) || !isset($_POST['descuento']) || !isset($_POST['total'])) {
         $missing_fields[] = 'montos (subtotal, descuento, total)';
@@ -33,21 +33,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // 2. Recolección y saneamiento de datos.
     $servicios_ids = $_POST['id_servicio']; // Es un array de IDs.
-    $metodo_pago = trim($_POST['metodo_pago']);
+    $id_forma_pago = (int)$_POST['id_forma_pago'];
     $subtotal = floatval($_POST['subtotal']);
     $descuento = floatval($_POST['descuento']);
     $total_pagado = floatval($_POST['total']);
 
     // 3. Procesamiento con transacción PDO.
     try {
+                // VERIFICAR SI HAY CAJA ABIERTA
+        $stmt_caja_check = $conexion->prepare("SELECT COUNT(*) FROM caja WHERE fecha_cierre IS NULL");
+        $stmt_caja_check->execute();
+        if ($stmt_caja_check->fetchColumn() == 0) {
+            throw new Exception("No se puede facturar porque no hay una caja abierta. Por favor, realice la apertura de caja.");
+        }
+
         $conexion->beginTransaction();
 
         // Paso 1: Crear la factura principal en la tabla 'facturas'.
-        $sql_factura = "INSERT INTO facturas (subtotal, descuento, total_pagado, metodo_pago, fecha_factura) VALUES (?, ?, ?, ?, NOW())";
+        $sql_factura = "INSERT INTO facturas (subtotal, descuento, total_pagado, id_forma_pago, fecha_factura) VALUES (?, ?, ?, ?, NOW())";
         $stmt_factura = $conexion->prepare($sql_factura);
         
         // El execute se hace con un array de los valores.
-        $stmt_factura->execute([$subtotal, $descuento, $total_pagado, $metodo_pago]);
+        $stmt_factura->execute([$subtotal, $descuento, $total_pagado, $id_forma_pago]);
         
         if ($stmt_factura->rowCount() <= 0) {
             throw new Exception("No se pudo crear la factura en la base de datos.");

@@ -10,7 +10,8 @@ $menuItems = [
     'citas' => ['href' => 'citas.php', 'icon' => 'fas fa-calendar-alt', 'text' => 'Citas'],
     'citas_del_dia' => ['href' => 'citas_del_dia.php', 'icon' => 'fas fa-calendar-day', 'text' => 'Citas del Día'],
     'servicios_en_proceso' => ['href' => 'servicios_en_proceso.php', 'icon' => 'fas fa-tasks', 'text' => 'Servicios en Proceso'],
-    'facturacion' => ['href' => 'facturacion.php', 'icon' => 'fas fa-file-invoice-dollar', 'text' => 'Facturación']
+    'facturacion' => ['href' => 'facturacion.php', 'icon' => 'fas fa-file-invoice-dollar', 'text' => 'Facturación'],
+    'gestion_caja' => ['href' => 'gestion_caja.php', 'icon' => 'fas fa-cash-register', 'text' => 'Gestión de Caja']
 ];
 ?>
 <!-- Vertical Sidebar -->
