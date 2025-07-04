@@ -11,7 +11,8 @@ $menuItems = [
     'citas_del_dia' => ['href' => 'citas_del_dia.php', 'icon' => 'fas fa-calendar-day', 'text' => 'Citas del Día'],
     'servicios_en_proceso' => ['href' => 'servicios_en_proceso.php', 'icon' => 'fas fa-tasks', 'text' => 'Servicios en Proceso'],
     'facturacion' => ['href' => 'facturacion.php', 'icon' => 'fas fa-file-invoice-dollar', 'text' => 'Facturación'],
-    'gestion_caja' => ['href' => 'gestion_caja.php', 'icon' => 'fas fa-cash-register', 'text' => 'Gestión de Caja']
+    'gestion_caja' => ['href' => 'gestion_caja.php', 'icon' => 'fas fa-cash-register', 'text' => 'Gestión de Caja'],
+    'reportes' => ['href' => 'reportes.php', 'icon' => 'fas fa-chart-line', 'text' => 'Reportes']
 ];
 ?>
 <!-- Vertical Sidebar -->
