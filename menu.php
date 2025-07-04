@@ -1,58 +1,83 @@
 <?php
-// Default currentPage to avoid errors if not set
-if (!isset($currentPage)) {
-    $currentPage = '';
+// Este archivo asume que ya hay una sesión iniciada.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$menuItems = [
-    'monitor' => ['href' => 'index.php', 'icon' => 'fas fa-tv', 'text' => 'Monitor'],
-    'registrar_servicio' => ['href' => 'registrar_servicio.php', 'icon' => 'fas fa-plus-circle', 'text' => 'Registrar Servicio'],
-    'citas' => ['href' => 'citas.php', 'icon' => 'fas fa-calendar-alt', 'text' => 'Citas'],
-    'citas_del_dia' => ['href' => 'citas_del_dia.php', 'icon' => 'fas fa-calendar-day', 'text' => 'Citas del Día'],
-    'servicios_en_proceso' => ['href' => 'servicios_en_proceso.php', 'icon' => 'fas fa-tasks', 'text' => 'Servicios en Proceso'],
-    'facturacion' => ['href' => 'facturacion.php', 'icon' => 'fas fa-file-invoice-dollar', 'text' => 'Facturación'],
-    'gestion_caja' => ['href' => 'gestion_caja.php', 'icon' => 'fas fa-cash-register', 'text' => 'Gestión de Caja'],
-    'reportes' => ['href' => 'reportes.php', 'icon' => 'fas fa-chart-line', 'text' => 'Reportes']
+// Definimos los items del menú para cada rol
+$rol = $_SESSION['user_role'] ?? '';
+
+// Menú base para todos
+$menu_final = [
+    'Dashboard' => 'dashboard.php',
 ];
+
+// Permisos por rol
+$permisos = [
+    'Admin' => [
+        'Registrar Servicio' => 'registrar_servicio.php',
+        'Citas' => 'citas.php',
+        'Facturas' => 'facturacion.php',
+        'Gestión de Caja' => 'gestion_caja.php',
+        'Citas del Día' => 'citas_dia.php',
+        'Servicios en Proceso' => 'servicios_en_proceso.php',
+        'Reportes' => 'reportes.php',
+        'Usuarios' => 'usuarios.php',
+    ],
+    'caja' => [
+        'Registrar Servicio' => 'registrar_servicio.php',
+        'Citas' => 'citas.php',
+        'Facturas' => 'facturacion.php',
+        'Gestión de Caja' => 'gestion_caja.php',
+    ],
+    'lavado' => [
+        'Registrar Servicio' => 'registrar_servicio.php',
+        'Citas del Día' => 'citas_dia.php',
+        'Servicios en Proceso' => 'servicios_en_proceso.php',
+    ]
+];
+
+// Si el rol existe en los permisos, se combina con el menú base
+if (array_key_exists($rol, $permisos)) {
+    $menu_final = array_merge($menu_final, $permisos[$rol]);
+}
+
 ?>
-<!-- Vertical Sidebar -->
-<aside id="sidebar" class="bg-gray-800 text-white w-64 min-h-screen p-4 fixed top-0 left-0 -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-xl">
-    <div class="text-center mb-10">
-        <a href="index.php">
-            <img src="img/5125430911406550677.jpg" alt="AutoSpa Blue Line" class="mx-auto mb-4" width="150">
+
+<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+  <div class="px-3 py-3 lg:px-5 lg:pl-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center justify-start">
+        <a href="dashboard.php" class="flex ml-2 md:mr-24">
+          <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">LavaCar Deluxe</span>
         </a>
+      </div>
+      <div class="flex items-center">
+          <div class="flex items-center ml-3">
+            <div>
+              <span class="block text-sm text-gray-900 dark:text-white"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Invitado'); ?></span>
+              <span class="block text-xs text-gray-500 truncate dark:text-gray-400"><?php echo htmlspecialchars($_SESSION['user_role'] ?? 'Sin rol'); ?></span>
+            </div>
+          </div>
+        </div>
     </div>
-    <nav>
-        <?php foreach ($menuItems as $key => $item): ?>
-            <a href="<?php echo htmlspecialchars($item['href']); ?>" 
-               class="flex items-center py-2.5 px-4 my-2 rounded transition duration-200 <?php echo ($currentPage === $key) ? 'bg-blue-700' : 'hover:bg-blue-700'; ?>">
-                <i class="<?php echo htmlspecialchars($item['icon']); ?> mr-3 w-6 text-center"></i> 
-                <span><?php echo htmlspecialchars($item['text']); ?></span>
-            </a>
-        <?php endforeach; ?>
-    </nav>
+  </div>
+</nav>
+
+<aside id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+   <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+      <ul class="space-y-2 font-medium">
+         <?php
+            // Renderizar el menú final
+            foreach ($menu_final as $label => $url) {
+                echo '<li><a href="' . $url . '" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"><span class="ml-3">' . htmlspecialchars($label) . '</span></a></li>';
+            }
+
+            // Opción de Salir siempre al final, si hay sesión
+            if (isset($_SESSION['user_id'])) {
+                echo '<li class="pt-4 mt-4 space-y-2 border-t border-gray-200 dark:border-gray-700"><a href="logout.php" class="flex items-center p-2 text-red-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 group"><span class="ml-3">Cerrar Sesión</span></a></li>';
+            }
+         ?>
+      </ul>
+   </div>
 </aside>
-
-<!-- Hamburger Button (for mobile) -->
-<button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-50 text-white p-2 bg-gray-800 rounded-md focus:outline-none">
-    <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-    <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-</button>
-
-<!-- Sidebar Script -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        const closeIcon = document.getElementById('close-icon');
-
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-                hamburgerIcon.classList.toggle('hidden');
-                closeIcon.classList.toggle('hidden');
-            });
-        }
-    });
-</script>
