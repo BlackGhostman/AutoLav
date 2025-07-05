@@ -58,7 +58,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <?php foreach ($menu_final as $label => $item): ?>
                 <li>
                     <a href="<?php echo htmlspecialchars($item['href']); ?>" 
-                       class="flex items-center py-2.5 px-4 my-1 rounded-lg transition duration-200 <?php echo ($currentPage === $item['href']) ? 'bg-blue-700' : 'hover:bg-gray-700'; ?>">
+                       class="menu-link flex items-center py-2.5 px-4 my-1 rounded-lg transition duration-200 <?php echo ($currentPage === $item['href']) ? 'bg-blue-700' : 'hover:bg-gray-700'; ?>">
                         <i class="<?php echo htmlspecialchars($item['icon']); ?> mr-3 w-5 text-center"></i> 
                         <span><?php echo htmlspecialchars($label); ?></span>
                     </a>
@@ -68,7 +68,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <ul>
             <li>
                 <a href="logout.php" 
-                   class="flex items-center py-2.5 px-4 my-1 rounded-lg transition duration-200 text-red-400 hover:bg-red-700 hover:text-white">
+                   class="menu-link flex items-center py-2.5 px-4 my-1 rounded-lg transition duration-200 text-red-400 hover:bg-red-700 hover:text-white">
                     <i class="fas fa-sign-out-alt mr-3 w-5 text-center"></i> 
                     <span>Cerrar Sesión</span>
                 </a>
@@ -76,3 +76,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         </ul>
     </nav>
 </aside>
+
+<script>
+document.querySelectorAll('.menu-link').forEach(function(link) {
+    link.addEventListener('click', function() {
+        // Solo cerrar en pantallas pequeñas (menor a 640px)
+        if (window.innerWidth < 640) {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('open');
+            sidebar.style.transform = 'translateX(-100%)';
+        }
+    });
+});
+</script>
