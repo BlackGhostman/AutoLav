@@ -4,6 +4,7 @@ $currentPage = 'facturacion';
 include 'header.php'; 
 ?>
 
+<body class="bg-gray-100">
 <main id="main-content" class="lg:ml-64 flex-grow p-4 md:p-8 no-print">
     <header class="mb-8 text-center">
         <h1 class="text-4xl font-bold text-gray-800">Facturación</h1>
@@ -386,4 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchServicesToBill();
 });
 </script>
+</main>
+</body>
 <?php include 'footer.php'; ?>

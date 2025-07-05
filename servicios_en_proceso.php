@@ -4,14 +4,16 @@ $currentPage = 'servicios_en_proceso';
 include 'header.php'; 
 ?>
 
-<main id="main-content" class="lg:ml-64 flex-grow p-4 md:p-8">
-    <header class="mb-8 text-center">
-        <h1 class="text-4xl font-bold text-gray-800">Servicios en Proceso</h1>
-        <p class="text-gray-500">Lista de vehículos que se están atendiendo actualmente. <span id="last-updated" class="text-xs font-mono"></span></p>
-    </header>
+<main id="main-content" class="lg:ml-64 p-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Servicios en Proceso</h1>
+            <p class="text-gray-500">Lista de vehículos que se están atendiendo actualmente. <span id="last-updated" class="text-xs font-mono"></span></p>
+        </header>
 
-    <div id="lista-servicios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <p id="loading-message" class="text-center col-span-full">Cargando servicios...</p>
+        <div id="lista-servicios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p id="loading-message" class="text-center col-span-full">Cargando servicios...</p>
+        </div>
     </div>
 </main>
 

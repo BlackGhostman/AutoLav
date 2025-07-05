@@ -3,14 +3,16 @@ $currentPage = 'citas';
 include 'header.php'; 
 ?>
 
-    <div class="container mx-auto">
+    <body class="bg-gray-100">
+<main id="main-content" class="lg:ml-64 p-6">
+<div class="container mx-auto">
         <header class="mb-8 text-center">
             <h1 class="text-4xl font-bold text-gray-800">Gestión de Citas</h1>
             <p class="text-gray-500">Programe, modifique o cancele citas de servicios.</p>
         </header>
 
         <!-- Formulario para Crear Cita -->
-        <div class="bg-white p-6 rounded-lg shadow-lg mb-8 max-w-4xl mx-auto">
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
             <h2 class="text-2xl font-semibold mb-4 border-b pb-3">Programar Nueva Cita</h2>
             <form id="cita-form" class="space-y-6 mt-4">
                 <!-- Paso 1: Placa -->
@@ -345,4 +347,5 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchInitialData();
 });
 </script>
+</main>
 <?php include 'footer.php'; ?>

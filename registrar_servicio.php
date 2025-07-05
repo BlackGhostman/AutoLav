@@ -3,9 +3,11 @@ $page_title = 'Registrar Servicio - AutoSpa Blue Line';
 require_once 'header.php'; 
 ?>
 
-<div class="w-full max-w-2xl mx-auto p-6 md:p-8">
+<body class="bg-gray-100">
+<main id="main-content" class="lg:ml-64 p-6">
+<div class="w-full max-w-4xl mx-auto p-6 md:p-8">
     <header class="mb-6 text-center">
-        <h1 class="text-3xl font-bold text-gray-900">Registrar Nuevo Servicio</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Registrar Nuevo Servicio</h1>
         <p class="text-gray-500">Siga los pasos para iniciar un nuevo lavado.</p>
     </header>
 
@@ -71,6 +73,7 @@ require_once 'header.php';
     </div>
 </div>
 
+</main>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM ELEMENTS ---

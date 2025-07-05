@@ -6,7 +6,7 @@ include 'header.php';
 
 <main id="main-content" class="lg:ml-64 p-6">
 
-    <h1 class="text-3xl font-bold mb-6">Reportes</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Reportes</h1>
 
     <!-- Controles de Fecha -->
     <div class="bg-white p-4 rounded-lg shadow-md mb-6">
@@ -148,10 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const { summary, details } = result.data;
             let html = `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Facturado</p><p class="text-2xl font-bold">${formatCurrency(summary.total_facturado || 0)}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">N° de Facturas</p><p class="text-2xl font-bold">${summary.numero_facturas || 0}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Promedio por Factura</p><p class="text-2xl font-bold">${formatCurrency(summary.promedio_factura || 0)}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Descuentos</p><p class="text-2xl font-bold text-red-600">-${formatCurrency(summary.total_descuentos || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Facturado</p><p class="text-2xl font-bold">${formatCurrency(summary.total_facturado || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">N° de Facturas</p><p class="text-2xl font-bold">${summary.numero_facturas || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Promedio por Factura</p><p class="text-2xl font-bold">${formatCurrency(summary.promedio_factura || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Descuentos</p><p class="text-2xl font-bold text-red-600">-${formatCurrency(summary.total_descuentos || 0)}</p></div>
                 </div>
                 <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr><th class="text-left py-3 px-4 font-semibold text-sm">N° Factura</th><th class="text-left py-3 px-4 font-semibold text-sm">Fecha</th><th class="text-left py-3 px-4 font-semibold text-sm">Cliente</th><th class="text-right py-3 px-4 font-semibold text-sm">Monto</th></tr></thead><tbody class="text-gray-700">`;
             if (details.length > 0) {
@@ -178,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const { summary, details } = result.data;
             let html = `
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total de Citas</p><p class="text-2xl font-bold text-blue-800">${summary.Total || 0}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Completadas</p><p class="text-2xl font-bold text-green-800">${summary.Completada || 0}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Pendientes</p><p class="text-2xl font-bold text-yellow-800">${summary.Pendiente || 0}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Confirmadas</p><p class="text-2xl font-bold text-purple-800">${summary.Confirmada || 0}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Canceladas</p><p class="text-2xl font-bold text-red-800">${summary.Cancelada || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total de Citas</p><p class="text-2xl font-bold text-blue-800">${summary.Total || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Completadas</p><p class="text-2xl font-bold text-green-800">${summary.Completada || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Pendientes</p><p class="text-2xl font-bold text-yellow-800">${summary.Pendiente || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Confirmadas</p><p class="text-2xl font-bold text-purple-800">${summary.Confirmada || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Canceladas</p><p class="text-2xl font-bold text-red-800">${summary.Cancelada || 0}</p></div>
                 </div>
                 <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr><th class="text-left py-3 px-4 font-semibold text-sm">ID Cita</th><th class="text-left py-3 px-4 font-semibold text-sm">Fecha</th><th class="text-left py-3 px-4 font-semibold text-sm">Cliente</th><th class="text-left py-3 px-4 font-semibold text-sm">Placa</th><th class="text-left py-3 px-4 font-semibold text-sm">Estado</th></tr></thead><tbody class="text-gray-700">`;
             if (details.length > 0) {
@@ -217,10 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let html = `
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Ventas</p><p class="text-2xl font-bold">${formatCurrency(summary.total_ventas || 0)}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Monto Final Real</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(summary.total_monto_final || 0)}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Diferencias</p><p class="text-2xl font-bold ${getDiferenciaColor(summary.total_diferencia)}">${formatCurrency(summary.total_diferencia || 0)}</p></div>
-                    <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Sesiones Cerradas</p><p class="text-2xl font-bold">${summary.numero_sesiones || 0}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Ventas</p><p class="text-2xl font-bold">${formatCurrency(summary.total_ventas || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Monto Final Real</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(summary.total_monto_final || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Total Diferencias</p><p class="text-2xl font-bold ${getDiferenciaColor(summary.total_diferencia)}">${formatCurrency(summary.total_diferencia || 0)}</p></div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-500">Sesiones Cerradas</p><p class="text-2xl font-bold">${summary.numero_sesiones || 0}</p></div>
                 </div>
                 <div class="overflow-x-auto bg-white rounded-lg shadow"><table class="min-w-full"><thead class="bg-gray-50"><tr>
                     <th class="text-left py-3 px-4 font-semibold text-sm">ID Sesión</th>
