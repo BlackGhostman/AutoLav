@@ -10,20 +10,8 @@ $caja_abierta = $stmt->fetch(PDO::FETCH_ASSOC);
 $monto_inicial = $caja_abierta ? $caja_abierta['monto_inicial'] : 0;
 $fecha_apertura = $caja_abierta ? new DateTime($caja_abierta['fecha_apertura']) : null;
 
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Gestión de Caja</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-</head>
-<body class="bg-gray-900 text-white">
-
-<?php 
 $currentPage = 'gestion_caja';
-include 'menu.php'; 
+include 'header.php'; 
 ?>
 
 <main id="main-content" class="lg:ml-64 transition-all duration-300 ease-in-out">
@@ -197,5 +185,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-</body>
-</html>
+<?php include 'footer.php'; ?>

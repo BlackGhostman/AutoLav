@@ -1,36 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Citas - AutoSpa Blue Line</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .loader {
-            border: 2px solid #e5e7eb; /* gray-200 */
-            border-top: 2px solid #3b82f6; /* blue-500 */
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-
 <?php 
 $currentPage = 'citas';
-include 'menu.php'; 
+include 'header.php'; 
 ?>
 
-<main id="main-content" class="lg:ml-64 flex-grow p-4 md:p-8">
     <div class="container mx-auto">
         <header class="mb-8 text-center">
             <h1 class="text-4xl font-bold text-gray-800">Gestión de Citas</h1>
@@ -118,7 +90,6 @@ include 'menu.php';
             </form>
         </div>
     </div>
-</main>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -374,5 +345,4 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchInitialData();
 });
 </script>
-</body>
-</html>
+<?php include 'footer.php'; ?>

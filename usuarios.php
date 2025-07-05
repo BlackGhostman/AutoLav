@@ -7,24 +7,14 @@ if ($_SESSION['user_role'] !== 'Admin') {
     exit();
 }
 
-// Incluir el menú que ya tiene la conexión y la sesión iniciada
-include 'menu.php';
+$currentPage = 'usuarios';
+include 'header.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios - Lavacar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body class="bg-gray-100">
 
     <!-- El menú lateral ya está incluido con menu.php -->
 
     <!-- Contenido principal -->
-    <div class="p-4 sm:ml-64">
+    <div class="p-4 lg:ml-64 transition-all duration-300 ease-in-out">
         <div class="p-4 mt-14">
             <h1 class="text-3xl font-bold text-gray-800 mb-4">Gestión de Usuarios</h1>
             <div class="bg-white p-6 rounded-lg shadow-lg">
@@ -207,5 +197,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-</body>
-</html>
+<?php include 'footer.php'; ?>

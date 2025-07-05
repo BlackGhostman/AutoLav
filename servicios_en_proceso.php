@@ -1,23 +1,7 @@
 <?php require_once 'proteger_pagina.php'; ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios en Proceso - AutoSpa Blue Line</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .modal { transition: opacity 0.3s ease-in-out; }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-
 <?php 
 $currentPage = 'servicios_en_proceso';
-include 'menu.php'; 
+include 'header.php'; 
 ?>
 
 <main id="main-content" class="lg:ml-64 flex-grow p-4 md:p-8">
@@ -153,5 +137,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(fetchServicios, 30000);
 });
 </script>
-</body>
-</html>
+<?php include 'footer.php'; ?>

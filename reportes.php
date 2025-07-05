@@ -1,23 +1,8 @@
 <?php 
-$currentPage = 'reportes';
 require_once 'proteger_pagina.php'; // Guardián de seguridad
-include 'menu.php'; 
+$currentPage = 'reportes';
+include 'header.php'; 
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes - AutoSpa Blue Line</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-gray-100">
 
 <main id="main-content" class="lg:ml-64 p-6">
 
@@ -270,3 +255,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+<?php include 'footer.php'; ?>
