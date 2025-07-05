@@ -3,7 +3,7 @@ $page_title = 'Registrar Servicio - AutoSpa Blue Line';
 require_once 'header.php'; 
 ?>
 
-<body class="bg-gray-100">
+
 <main id="main-content" class="lg:ml-64 p-6">
 <div class="w-full max-w-4xl mx-auto p-6 md:p-8">
     <header class="mb-6 text-center">

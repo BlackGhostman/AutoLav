@@ -30,3 +30,22 @@ include 'menu.php';
     <!-- Contenido Principal -->
     <main class="p-4 sm:ml-64 transition-all duration-300">
         <!-- El contenido específico de cada página irá aquí -->
+
+<!-- Script para abrir/cerrar el menú lateral en móvil -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var toggleBtn = document.getElementById('sidebar-toggle');
+    var sidebar = document.getElementById('sidebar');
+    if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            if (sidebar.classList.contains('open')) {
+                sidebar.style.transform = 'translateX(0)';
+            } else {
+                sidebar.style.transform = 'translateX(-100%)';
+            }
+        });
+    }
+});
+</script>
+
