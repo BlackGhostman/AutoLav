@@ -14,7 +14,7 @@ require_once 'header.php';
     <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
         <div>
             <label for="placa" class="block text-lg font-semibold text-gray-700 mb-2">Paso 1: Ingrese la Placa</label>
-            <input type="text" id="placa" maxlength="7" class="form-input text-center text-xl tracking-widest" placeholder="ABC123">
+            <input type="text" id="placa" maxlength="7" class="w-full form-input text-center text-xl tracking-widest" placeholder="ABC123">
         </div>
 
         <div id="client-section" class="form-section hidden opacity-0 max-h-0">
