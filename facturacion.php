@@ -67,6 +67,24 @@ include 'header.php';
             <div><label for="discount-input" class="block text-sm font-medium text-gray-600">Descuento</label><input type="text" id="discount-input" placeholder="0" class="w-full mt-1 p-2 border rounded text-right"></div>
             <div><label for="payment-method" class="block text-sm font-medium text-gray-600">Forma de Pago</label><select id="payment-method-select" class="w-full mt-1 p-2 border rounded"><option>Cargando...</option></select></div>
             <div id="cash-payment-section" class="hidden"><label for="cash-received" class="block text-sm font-medium text-gray-600">Paga con</label><input type="text" id="cash-received" placeholder="0" class="w-full mt-1 p-2 border rounded text-right"></div>
+            
+            <!-- Factura Electrónica -->
+            <div class="border-t pt-4 space-y-3">
+                 <div class="flex items-center">
+                    <input id="es-electronica-checkbox" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="es-electronica-checkbox" class="ml-2 block text-sm font-medium text-gray-700">Generar Factura Electrónica</label>
+                </div>
+                <div id="electronica-fields" class="hidden space-y-3">
+                    <div>
+                        <label for="cliente-cedula-input" class="block text-sm font-medium text-gray-600">Cédula del Cliente</label>
+                        <input type="text" id="cliente-cedula-input" placeholder="Cédula física o jurídica" class="w-full mt-1 p-2 border rounded">
+                    </div>
+                    <div>
+                        <label for="cliente-email-input" class="block text-sm font-medium text-gray-600">Correo Electrónico</label>
+                        <input type="email" id="cliente-email-input" placeholder="correo@ejemplo.com" class="w-full mt-1 p-2 border rounded">
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="border-t pt-4 mt-4 space-y-2 font-medium">
             <div class="flex justify-between"><span>Subtotal:</span><span id="billing-subtotal"></span></div>
@@ -96,6 +114,43 @@ include 'header.php';
         </div>
     </div>
 </div>
+
+<style>
+@media print {
+  /* Ocultar la barra lateral, el contenido principal, el modal de facturación y el botón del menú móvil */
+  #sidebar, #main-content, #billing-modal, #sidebar-toggle {
+    display: none !important;
+  }
+
+  /* Estilos para el modal del recibo al imprimir */
+  #receipt-modal {
+    /* Anular estilos de modal para que ocupe toda la página */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background-color: white !important;
+    padding: 0 !important;
+    display: block !important;
+    opacity: 1 !important; /* Asegurarse de que sea visible */
+  }
+
+  #receipt-modal-content {
+    /* Resetear estilos del contenido para impresión */
+    box-shadow: none !important;
+    margin: 0 auto !important; /* Centrar el recibo */
+    padding: 0.5rem !important;
+    max-width: 320px !important; /* Ancho típico de recibo de impresora térmica */
+    border: none !important;
+  }
+
+  /* La clase no-print, que ya está en los botones, los ocultará */
+  .no-print {
+    display: none !important;
+  }
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -250,6 +305,20 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('total', subtotal - discount);
         formData.append('id_forma_pago', paymentMethodSelect.value);
 
+        const esElectronica = document.getElementById('es-electronica-checkbox').checked;
+        formData.append('es_electronica', esElectronica ? '1' : '0');
+
+        if (esElectronica) {
+            const cedula = document.getElementById('cliente-cedula-input').value;
+            const email = document.getElementById('cliente-email-input').value;
+            if (!cedula.trim() || !email.trim()) {
+                alert('Para la factura electrónica, la cédula y el correo son obligatorios.');
+                return;
+            }
+            formData.append('cliente_cedula', cedula);
+            formData.append('cliente_email', email);
+        }
+
         try {
             const response = await fetch('procesar_pago.php', { method: 'POST', body: formData });
             const result = await response.json();
@@ -331,7 +400,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Modales y Vistas ---
-    function openBillingModal() { updateBillingModal(); billingModal.classList.remove('hidden'); setTimeout(() => billingModal.classList.remove('opacity-0'), 10); }
+    function openBillingModal() {
+        const selectedIds = Array.from(document.querySelectorAll('.service-checkbox:checked')).map(cb => parseInt(cb.dataset.id));
+        const servicesToBill = servicesData.filter(s => selectedIds.includes(parseInt(s.id_servicio)));
+
+        if (servicesToBill.length > 0) {
+            const firstClient = servicesToBill[0];
+            const allSameClient = servicesToBill.every(s => s.id_cliente === firstClient.id_cliente);
+
+            if (allSameClient && firstClient.id_cliente) {
+                document.getElementById('cliente-cedula-input').value = firstClient.cliente_cedula || '';
+                document.getElementById('cliente-email-input').value = firstClient.cliente_email || '';
+            } else {
+                document.getElementById('cliente-cedula-input').value = '';
+                document.getElementById('cliente-email-input').value = '';
+            }
+        }
+
+        updateBillingModal(); 
+        billingModal.classList.remove('hidden'); 
+        setTimeout(() => billingModal.classList.remove('opacity-0'), 10); 
+    }
     function closeBillingModal() { billingModal.classList.add('opacity-0'); setTimeout(() => billingModal.classList.add('hidden'), 300); }
     function openReceiptModal() { receiptModal.classList.remove('hidden'); setTimeout(() => receiptModal.classList.remove('opacity-0'), 10); }
     function closeReceiptModal() { receiptModal.classList.add('opacity-0'); setTimeout(() => receiptModal.classList.add('hidden'), 300); }
@@ -365,6 +454,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('print-receipt-button').addEventListener('click', () => window.print());
     [discountInput, cashReceivedInput].forEach(input => input.addEventListener('input', (e) => { handleCurrencyInput(e); updateBillingModal(); }));
     paymentMethodSelect.addEventListener('change', updateBillingModal);
+
+    document.getElementById('es-electronica-checkbox').addEventListener('change', (e) => {
+        document.getElementById('electronica-fields').classList.toggle('hidden', !e.target.checked);
+    });
+
     listaContainer.addEventListener('change', (e) => { if (e.target.classList.contains('service-checkbox')) { facturarBtn.disabled = !document.querySelector('.service-checkbox:checked'); } });
     listaContainer.addEventListener('click', (e) => {
         if (e.target.classList.contains('select-all-btn')) {

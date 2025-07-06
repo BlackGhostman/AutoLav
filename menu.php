@@ -14,6 +14,7 @@ $todos_los_items = [
     'Registrar Servicio'    => ['href' => 'registrar_servicio.php', 'icon' => 'fas fa-plus-circle'],
     'Citas'                 => ['href' => 'citas.php', 'icon' => 'fas fa-calendar-alt'],
     'Facturas'              => ['href' => 'facturacion.php', 'icon' => 'fas fa-file-invoice-dollar'],
+    'Facturas Electrónicas' => ['href' => 'facturas_electronicas.php', 'icon' => 'fas fa-paper-plane'],
     'Gestión de Caja'       => ['href' => 'gestion_caja.php', 'icon' => 'fas fa-cash-register'],
     'Citas del Día'         => ['href' => 'citas_del_dia.php', 'icon' => 'fas fa-calendar-day'],
     'Servicios en Proceso'  => ['href' => 'servicios_en_proceso.php', 'icon' => 'fas fa-tasks'],
@@ -24,7 +25,7 @@ $todos_los_items = [
 // 2. Definir los permisos para cada rol (los textos deben coincidir con las claves de $todos_los_items)
 $permisos = [
     'Admin'  => array_keys($todos_los_items), // Admin tiene acceso a todo
-    'caja'   => ['Dashboard', 'Registrar Servicio', 'Citas', 'Facturas', 'Gestión de Caja'],
+    'caja'   => ['Dashboard', 'Registrar Servicio', 'Citas', 'Facturas', 'Facturas Electrónicas', 'Gestión de Caja'],
     'lavado' => ['Dashboard', 'Registrar Servicio', 'Citas del Día', 'Servicios en Proceso']
 ];
 

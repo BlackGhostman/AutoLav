@@ -50,11 +50,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $conexion->beginTransaction();
 
         // Paso 1: Crear la factura principal en la tabla 'facturas'.
-        $sql_factura = "INSERT INTO facturas (subtotal, descuento, total_pagado, id_forma_pago, fecha_factura) VALUES (?, ?, ?, ?, NOW())";
+        $es_electronica = isset($_POST['es_electronica']) && $_POST['es_electronica'] == '1';
+        $cliente_cedula = $es_electronica ? ($_POST['cliente_cedula'] ?? null) : null;
+        $cliente_email = $es_electronica ? ($_POST['cliente_email'] ?? null) : null;
+
+        $sql_factura = "INSERT INTO facturas (subtotal, descuento, total_pagado, id_forma_pago, fecha_factura, es_electronica, cliente_cedula, cliente_email, estado_electronica) VALUES (:subtotal, :descuento, :total, :forma_pago, NOW(), :es_electronica, :cedula, :email, :estado)";
         $stmt_factura = $conexion->prepare($sql_factura);
         
-        // El execute se hace con un array de los valores.
-        $stmt_factura->execute([$subtotal, $descuento, $total_pagado, $id_forma_pago]);
+        $estado_electronica = $es_electronica ? 'pendiente' : null;
+
+        // El execute se hace con un array asociativo para mayor claridad y evitar errores.
+        $stmt_factura->execute([
+            ':subtotal' => $subtotal,
+            ':descuento' => $descuento,
+            ':total' => $total_pagado,
+            ':forma_pago' => $id_forma_pago,
+            ':es_electronica' => $es_electronica ? 1 : 0, // Enviar como entero
+            ':cedula' => $cliente_cedula,
+            ':email' => $cliente_email,
+            ':estado' => $estado_electronica
+        ]);
         
         if ($stmt_factura->rowCount() <= 0) {
             throw new Exception("No se pudo crear la factura en la base de datos.");

@@ -17,6 +17,8 @@ try {
             v.tipo_vehiculo,
             c.id_cliente,
             c.nombre as nombre_cliente,
+            c.cedula as cliente_cedula,
+            c.email as cliente_email,
             e.nombre_estado,
             (SELECT SUM(sd.precio_cobrado) FROM servicios_detalle sd WHERE sd.id_servicio = s.id_servicio) as total_servicio
         FROM servicios s
