@@ -41,7 +41,8 @@ try {
         SELECT DISTINCT
             v.placa, 
             c.nombre AS nombre_cliente, 
-            c.cedula
+            c.cedula,
+            c.celular
         FROM factura_detalles fd
         JOIN servicios s ON fd.id_servicio = s.id_servicio
         JOIN vehiculos v ON s.id_vehiculo = v.id_vehiculo

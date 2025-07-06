@@ -108,9 +108,10 @@ include 'header.php';
         <div id="receipt-details" class="space-y-1"></div>
         <div id="receipt-summary" class="mt-4 pt-3 border-t border-dashed"></div>
         <p class="text-xs text-gray-500 text-center mt-4" id="receipt-date"></p>
-        <div class="mt-5 flex gap-3 no-print">
-            <button id="close-receipt-button" class="w-full py-2 bg-gray-600 text-white rounded-lg">Cerrar</button>
-            <button id="print-receipt-button" class="w-full py-2 bg-blue-600 text-white rounded-lg">Imprimir</button>
+        <div class="mt-5 flex flex-col sm:flex-row gap-3 no-print">
+            <button id="close-receipt-button" class="flex-1 py-2 px-4 bg-gray-600 text-white rounded-lg">Cerrar</button>
+            <button id="whatsapp-receipt-button" class="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg" style="display: none;">WhatsApp</button>
+            <button id="print-receipt-button" class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg">Imprimir</button>
         </div>
     </div>
 </div>
@@ -166,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Estado de la Aplicación ---
     let servicesData = [];
+    let currentReceiptData = null;
 
     // --- Funciones de Utilidad ---
     const formatCurrency = (num) => new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(num);
@@ -381,7 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Network response was not ok.');
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
+
+            currentReceiptData = result.data; // Guardar los datos completos
             const { factura, vehiculos, detalles } = result.data;
+
             const cliente = vehiculos[0] || {};
             document.getElementById('receipt-header').innerHTML = `<div class="grid grid-cols-2 gap-x-4 gap-y-1"><div><strong>Factura #:</strong> ${factura.id_factura}</div><div><strong>Placa(s):</strong> ${vehiculos.map(v => v.placa).join(', ')}</div><div class="col-span-2"><strong>Cliente:</strong> ${cliente.nombre_cliente || 'N/A'}</div><div><strong>Cédula:</strong> ${cliente.cedula || 'N/A'}</div></div>`;
             const detailsContainer = document.getElementById('receipt-details');
@@ -392,10 +397,20 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryHTML += `<div class="flex justify-between font-bold text-base mt-1 border-t pt-1"><span>Total Pagado:</span><span>${formatCurrency(factura.total_pagado)}</span></div>`;
             document.getElementById('receipt-summary').innerHTML = summaryHTML;
             document.getElementById('receipt-date').textContent = new Date(factura.fecha_factura).toLocaleString('es-CR');
+
+            // Lógica para el botón de WhatsApp
+            const whatsappButton = document.getElementById('whatsapp-receipt-button');
+            if (cliente && cliente.celular && cliente.celular.trim() !== '') {
+                whatsappButton.style.display = 'block';
+            } else {
+                whatsappButton.style.display = 'none';
+            }
+
             openReceiptModal();
         } catch (error) {
             console.error('Error showing receipt:', error);
             alert('No se pudo mostrar el recibo.');
+            currentReceiptData = null;
         }
     }
 
@@ -423,7 +438,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function closeBillingModal() { billingModal.classList.add('opacity-0'); setTimeout(() => billingModal.classList.add('hidden'), 300); }
     function openReceiptModal() { receiptModal.classList.remove('hidden'); setTimeout(() => receiptModal.classList.remove('opacity-0'), 10); }
-    function closeReceiptModal() { receiptModal.classList.add('opacity-0'); setTimeout(() => receiptModal.classList.add('hidden'), 300); }
+    function closeReceiptModal() {
+        receiptModal.classList.add('opacity-0');
+        setTimeout(() => receiptModal.classList.add('hidden'), 300);
+        currentReceiptData = null; // Limpiar datos al cerrar
+    }
+
+    function sendWhatsAppReceipt() {
+        if (!currentReceiptData) return;
+
+        const { factura, vehiculos, detalles } = currentReceiptData;
+        const cliente = vehiculos[0] || {};
+        const celular = cliente.celular ? cliente.celular.replace(/\D/g, '') : null;
+        
+        if (!celular || celular.length < 8) {
+            alert('Este cliente no tiene un número de celular válido registrado.');
+            return;
+        }
+
+        let detalleServicios = detalles.map(d => `- ${d.nombre_servicio}: ${formatCurrency(d.precio_cobrado)}`).join('\n');
+
+        const message = `*AUTOSPA BLUE LINE*\n¡Gracias por su preferencia!\n\n*Factura #${factura.id_factura}*\nCliente: ${cliente.nombre_cliente || 'N/A'}\nPlaca(s): ${vehiculos.map(v => v.placa).join(', ')}\n\n*Detalle:*\n${detalleServicios}\n\nSubtotal: ${formatCurrency(factura.subtotal)}\nDescuento: ${formatCurrency(factura.descuento)}\n*Total Pagado:* *${formatCurrency(factura.total_pagado)}*\n\nFecha: ${new Date(factura.fecha_factura).toLocaleString('es-CR')}\n`;
+
+        // Asumiendo prefijo de Costa Rica 506
+        const whatsappUrl = `https://wa.me/506${celular}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
 
     function setActiveView(view) {
         const facturarSection = document.getElementById('facturar-section');
@@ -451,6 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cancel-billing-button').addEventListener('click', closeBillingModal);
     document.getElementById('confirm-payment-button').addEventListener('click', processPayment);
     document.getElementById('close-receipt-button').addEventListener('click', closeReceiptModal);
+    document.getElementById('whatsapp-receipt-button').addEventListener('click', sendWhatsAppReceipt);
     document.getElementById('print-receipt-button').addEventListener('click', () => window.print());
     [discountInput, cashReceivedInput].forEach(input => input.addEventListener('input', (e) => { handleCurrencyInput(e); updateBillingModal(); }));
     paymentMethodSelect.addEventListener('change', updateBillingModal);
