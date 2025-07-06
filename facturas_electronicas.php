@@ -121,43 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalBody.innerHTML = detailsHtml;
         confirmSentBtn.dataset.id = facturaId; // Guardar el ID en el botón
-
-        // Botón de WhatsApp (si hay teléfono)
-        if (factura.cliente_telefono) {
-            const whatsappButton = document.createElement('button');
-            whatsappButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 4.315 1.919 6.066l-1.479 5.414 5.532-1.451zm-5.421 1.424l.005.002-.005-.002zm-.002-.005l-.005.003.005-.003zm.004.002l.003-.001-.003.001z"/></svg> Compartir por WhatsApp`;
-            whatsappButton.className = 'bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center';
-            whatsappButton.onclick = () => shareOnWhatsApp(factura.id_factura);
-            modalFooter.appendChild(whatsappButton);
-        }
-
-        const markAsSentButton = document.createElement('button');
-        markAsSentButton.textContent = 'Marcar como Enviada';
-        markAsSentButton.className = 'bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600';
-        markAsSentButton.onclick = () => markAsSent(factura.id_factura);
-        modalFooter.appendChild(markAsSentButton);
-
         modal.classList.remove('hidden');
-    }
-
-    function shareOnWhatsApp(invoiceId) {
-        const invoice = facturasData.find(f => f.id_factura === invoiceId);
-        if (!invoice || !invoice.cliente_telefono) {
-            alert('No se encontró el número de teléfono del cliente.');
-            return;
-        }
-
-        // Asumimos que el número ya tiene el código de país (ej. 506 para Costa Rica)
-        // Si no, habría que añadirlo.
-        const phone = invoice.cliente_telefono.replace(/\D/g, ''); // Limpiar caracteres no numéricos
-
-        const servicesText = invoice.detalles.map(d => `- ${d.nombre_servicio} (${formatCurrency(d.precio_cobrado)})`).join('\n');
-        
-        const message = `*AutoSpa Blue Line*\n\nEstimado cliente, le compartimos el resumen de su factura:\n\n*Factura N°:* ${invoice.id_factura}\n*Fecha:* ${new Date(invoice.fecha_factura).toLocaleDateString()}\n*Total:* ${formatCurrency(invoice.total_pagado)}\n\n*Servicios:*\n${servicesText}\n\n¡Gracias por su preferencia!`;
-
-        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-        window.open(whatsappUrl, '_blank');
     }
 
     function closeModal() {

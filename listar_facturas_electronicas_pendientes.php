@@ -7,10 +7,9 @@ $response = ['success' => false, 'data' => [], 'message' => 'No se encontraron f
 
 try {
     // 1. Traer todas las facturas y sus estados.
-    $sql = "SELECT f.id_factura, f.fecha_factura, f.cliente_cedula, f.cliente_email, f.total_pagado, f.es_electronica, f.estado_electronica, c.telefono AS cliente_telefono
-            FROM facturas f
-            LEFT JOIN clientes c ON f.cliente_cedula = c.cedula
-            ORDER BY f.fecha_factura DESC";
+    $sql = "SELECT id_factura, fecha_factura, cliente_cedula, cliente_email, total_pagado, es_electronica, estado_electronica
+            FROM facturas 
+            ORDER BY fecha_factura DESC";
             
     $stmt = $conexion->prepare($sql);
     $stmt->execute();
