@@ -65,7 +65,7 @@ require_once 'header.php';
             </div>
              <div class="mb-4 text-center">
                 <label for="start-time" class="block text-lg font-semibold text-gray-700">Hora de Inicio</label>
-                <input type="time" id="start-time" class="form-input w-48 mx-auto mt-2 text-center">
+                <input type="time" id="start-time" class="form-input w-48 mx-auto mt-2 text-center" readonly>
             </div>
             <button id="start-wash-button" class="w-full py-4 px-4 bg-green-600 text-white text-xl font-bold rounded-lg hover:bg-green-700 transition shadow-lg">INICIAR LAVADO</button>
         </div>
